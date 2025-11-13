@@ -82,12 +82,64 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            position: relative;
+            padding-bottom: 120px;
         }
 
         .hero p {
             font-size: 1.4rem;
             max-width: 700px;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: pulse-arrow 2s ease-in-out infinite;
+        }
+
+        .scroll-indicator::before {
+            content: '↓';
+            font-size: 2rem;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(168, 156, 196, 0.8), 0 0 30px rgba(168, 156, 196, 0.5);
+            animation: bounce-arrow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-arrow {
+            0%, 100% { 
+                opacity: 0.6;
+                transform: translateX(-50%) translateY(0);
+            }
+            50% { 
+                opacity: 1;
+                transform: translateX(-50%) translateY(8px);
+            }
+        }
+
+        @keyframes bounce-arrow {
+            0%, 100% { 
+                transform: translateY(0);
+            }
+            50% { 
+                transform: translateY(5px);
+            }
+        }
+
+        .scroll-indicator:hover {
+            opacity: 1;
+        }
+
+        .scroll-indicator:hover::before {
+            text-shadow: 0 0 20px rgba(168, 156, 196, 1), 0 0 40px rgba(168, 156, 196, 0.8);
         }
 
         /* Scene 1: Chaos → ReliAPI → Stability */
@@ -642,6 +694,7 @@
             <h1>ReliAPI</h1>
             <p>Most APIs fail sometimes. ReliAPI keeps them stable.</p>
         </div>
+        <div class="scroll-indicator" onclick="document.getElementById('scene-1').scrollIntoView({behavior: 'smooth'})" aria-label="Scroll to next section"></div>
     </section>
 
     <!-- Scene 1: Chaos → ReliAPI → Stability -->
