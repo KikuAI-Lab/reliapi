@@ -9,6 +9,7 @@ Welcome to the ReliAPI Wiki — your guide to building reliable HTTP and LLM API
 - [Configuration](Configuration) — Configuring targets and policies
 - [Reliability Features](Reliability-Features) — Detailed feature explanations
 - [Comparison](Comparison) — Comparison with other tools
+- [FAQ](FAQ) — Frequently asked questions
 
 ## Getting Started
 
