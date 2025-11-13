@@ -1,0 +1,40 @@
+# Example: HTTP-only configuration
+# Use this for generic HTTP API proxying
+
+targets:
+  # Example: External REST API
+  my_api:
+    base_url: "https://api.example.com"
+    timeout_ms: 10000
+    
+    # Circuit breaker: open after 5 errors, cooldown 60s
+    circuit:
+      error_threshold: 5
+      cooldown_s: 60
+    
+    # Cache: GET/HEAD requests cached for 5 minutes
+    cache:
+      ttl_s: 300
+      enabled: true
+    
+    # Auth: Bearer token from environment variable
+    auth:
+      type: bearer_env
+      env_var: API_KEY
+    
+    # Retry matrix: retry on 429, 5xx, network errors
+    retry_matrix:
+      "429":
+        attempts: 3
+        backoff: "exp-jitter"
+        base_s: 1.0
+        max_s: 60.0
+      "5xx":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0
+      "net":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0
+
