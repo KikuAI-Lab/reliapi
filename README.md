@@ -196,7 +196,7 @@ See [COMPARISON.md](docs/COMPARISON.md) for detailed comparison with LiteLLM, Po
   - [Reliability Features](https://github.com/KikuAI-Lab/reliapi/wiki/Reliability-Features)
   - [Comparison](https://github.com/KikuAI-Lab/reliapi/wiki/Comparison)
 - [FAQ](docs/FAQ.md)
-- [Demo](docs/site/index.html) — [Interactive playground](docs/site/index.html)
+- [Demo](https://kikuai-lab.github.io/reliapi/) — [Interactive playground](https://kikuai-lab.github.io/reliapi/)
 
 ---
 
