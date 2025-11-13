@@ -189,11 +189,14 @@ See [COMPARISON.md](docs/COMPARISON.md) for detailed comparison with LiteLLM, Po
 
 ## Documentation
 
-- [Getting Started](docs/GETTING_STARTED.md)
-- [Configuration Guide](docs/CONFIGURATION.md)
-- [API Reference](docs/API.md)
+- **[Wiki](https://github.com/KikuAI-Lab/reliapi/wiki)** — Complete documentation and guides
+  - [Overview](https://github.com/KikuAI-Lab/reliapi/wiki/Overview)
+  - [Architecture](https://github.com/KikuAI-Lab/reliapi/wiki/Architecture)
+  - [Configuration](https://github.com/KikuAI-Lab/reliapi/wiki/Configuration)
+  - [Reliability Features](https://github.com/KikuAI-Lab/reliapi/wiki/Reliability-Features)
+  - [Comparison](https://github.com/KikuAI-Lab/reliapi/wiki/Comparison)
 - [FAQ](docs/FAQ.md)
-- [Comparison](docs/COMPARISON.md)
+- [Demo](docs/site/index.html) — [Interactive playground](docs/site/index.html)
 
 ---
 
