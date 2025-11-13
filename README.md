@@ -149,6 +149,7 @@ targets:
 - **Retries**: Configurable retry matrix per error class (429, 5xx, network)
 - **Circuit Breaker**: Per-target failure threshold and cooldown
 - **Fallback Chains**: Automatic failover to backup targets
+- **Works for all HTTP APIs**, not just LLM providers
 
 ### Predictability
 
