@@ -89,7 +89,36 @@
         .hero p {
             font-size: 1.4rem;
             max-width: 700px;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .action-button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(168, 156, 196, 0.3);
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(168, 156, 196, 0.5);
+            background: rgba(168, 156, 196, 0.95);
         }
 
         .scroll-indicator {
@@ -468,6 +497,93 @@
             background: rgba(168, 156, 196, 0.1);
         }
 
+        .demo-disclaimer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .jump-to-comparison {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .jump-link {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .jump-link:hover {
+            background: rgba(168, 156, 196, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(168, 156, 196, 0.3);
+        }
+
+        .integration-examples {
+            background: var(--bg);
+            padding: 80px 0;
+        }
+
+        .integration-examples h2 {
+            margin-bottom: 50px;
+        }
+
+        .code-examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .code-card {
+            background: var(--block);
+            border-radius: 18px;
+            padding: 30px;
+            border: 1px solid rgba(168, 156, 196, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .code-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(168, 156, 196, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .code-card h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .code-card pre {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 0;
+            border: 1px solid rgba(168, 156, 196, 0.1);
+        }
+
+        .code-card code {
+            color: var(--primary);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
         /* Scene 3: Why it matters */
         .scene-3 {
             background: var(--bg);
@@ -666,10 +782,28 @@
                 padding: 0 20px;
             }
 
+            .hero-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .action-button {
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+
             .scroll-indicator {
                 bottom: 40px;
                 width: 35px;
                 height: 35px;
+            }
+
+            .code-examples-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .code-card {
+                padding: 24px;
             }
 
             .scroll-indicator::before {
@@ -791,7 +925,15 @@
     <section class="hero">
         <div class="container">
             <h1>ReliAPI</h1>
-            <p>Most APIs fail sometimes. ReliAPI keeps them stable.</p>
+            <p>Stability layer for any API — HTTP or LLM.</p>
+            <div class="hero-actions">
+                <a href="https://rapidapi.com/placeholder" class="action-button" target="_blank" rel="noopener noreferrer">
+                    Use on RapidAPI
+                </a>
+                <a href="https://kikuai.dev/api/reliapi" class="action-button" target="_blank" rel="noopener noreferrer">
+                    Official API Endpoint
+                </a>
+        </div>
         </div>
         <div class="scroll-indicator" onclick="document.getElementById('scene-1').scrollIntoView({behavior: 'smooth'})" aria-label="Scroll to next section"></div>
     </section>
@@ -812,17 +954,17 @@
                         <div class="chaos-square"></div>
                         <div class="chaos-square"></div>
                         <div class="chaos-square"></div>
+                        </div>
                     </div>
-                </div>
                 <div class="flow-arrow">→</div>
                 <div class="reliapi-engine" id="reliapi-engine">
                     <div class="engine-ripples">
                         <div class="ripple"></div>
                         <div class="ripple"></div>
                         <div class="ripple"></div>
-                    </div>
+                        </div>
                     <span>ReliAPI</span>
-                </div>
+                    </div>
                 <div class="flow-arrow">→</div>
                 <div class="stability-zone">
                     <h3>Stability</h3>
@@ -836,13 +978,13 @@
                         <div class="stability-rect"></div>
                         <div class="stability-rect"></div>
                         <div class="stability-rect"></div>
-                    </div>
-                </div>
-            </div>
+                        </div>
+                        </div>
+                        </div>
             <button class="cta-button" onclick="document.getElementById('scene-2').scrollIntoView({behavior: 'smooth'})">
                 See how it works
             </button>
-        </div>
+                        </div>
     </section>
 
     <!-- Scene 2: Interactive Reliability Toggles -->
@@ -862,19 +1004,19 @@
                 <button class="toggle-button" onclick="toggleReliability('budget')">
                     Budget Cap Hit
                 </button>
-            </div>
+                </div>
             <div class="animation-display" id="animation-display">
                 <div class="animation-content">
                     <p style="color: var(--secondary); text-align: center; font-size: 1.1rem;">
                         Toggle a reliability test above to see ReliAPI in action
                     </p>
-                </div>
-            </div>
+                            </div>
+                            </div>
             <div style="text-align: center;">
                 <button class="toggle-details" onclick="toggleResponseEnvelope()">
                     Show technical response envelope
                 </button>
-            </div>
+                            </div>
             <div class="response-envelope" id="response-envelope">
                 <pre>{
   "success": true,
@@ -892,6 +1034,7 @@
   }
 }</pre>
             </div>
+            <p class="demo-disclaimer">This demo is fully synthetic and runs in the browser. No real API calls are made.</p>
         </div>
     </section>
 
@@ -903,11 +1046,11 @@
                 <div class="benefit-card">
                     <h3>App stays online</h3>
                     <p>Even during provider outages, your app keeps running. ReliAPI automatically routes to backup services.</p>
-                </div>
+                        </div>
                 <div class="benefit-card">
                     <h3>Predictable costs</h3>
                     <p>LLM costs remain predictable with budget caps. No surprise bills from runaway API calls.</p>
-                </div>
+                    </div>
                 <div class="benefit-card">
                     <h3>Automatic reliability</h3>
                     <p>Retry, circuit breaker, and cache happen automatically. You don't need to code resilience yourself.</p>
@@ -927,7 +1070,7 @@
                         <div class="chart-bar" style="height: 80%;">
                             <span class="chart-bar-value">20%</span>
                             <span class="chart-bar-label">Direct API</span>
-                        </div>
+                </div>
                         <div class="chart-bar" style="height: 5%;">
                             <span class="chart-bar-value">1%</span>
                             <span class="chart-bar-label">With ReliAPI</span>
@@ -954,6 +1097,11 @@
     <!-- Scene 5: Comparison -->
     <section class="scene-5" id="scene-5">
         <div class="container">
+            <div class="jump-to-comparison">
+                <a href="#scene-5" class="jump-link" onclick="event.preventDefault(); document.getElementById('scene-5').scrollIntoView({behavior: 'smooth'}); return false;">
+                    Jump to comparison
+                </a>
+            </div>
             <h2>ReliAPI vs Others</h2>
             <div class="comparison-table">
                 <div class="table-row">
@@ -997,6 +1145,47 @@
                     <div><div class="status-marker yellow"></div></div>
                     <div><div class="status-marker yellow"></div></div>
                     <div><div class="status-marker yellow"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Examples -->
+    <section class="integration-examples">
+        <div class="container">
+            <h2>Integration Examples</h2>
+            <div class="code-examples-grid">
+                <div class="code-card">
+                    <h3>Python</h3>
+                    <pre><code>import requests
+
+resp = requests.post(
+    "https://your-endpoint/proxy/llm",
+    json={
+        "target": "openai",
+        "messages": [
+            {"role": "user", "content": "Hello"}
+        ]
+    }
+)
+print(resp.json())</code></pre>
+                </div>
+                <div class="code-card">
+                    <h3>JavaScript</h3>
+                    <pre><code>const resp = await fetch(
+    "https://your-endpoint/proxy/llm",
+    {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            target: "openai",
+            messages: [
+                {role: "user", content: "Hello"}
+            ]
+        })
+    }
+);
+console.log(await resp.json());</code></pre>
                 </div>
             </div>
         </div>
