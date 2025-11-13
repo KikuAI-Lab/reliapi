@@ -199,9 +199,11 @@ See [COMPARISON.md](docs/COMPARISON.md) for detailed comparison with LiteLLM, Po
 
 ## Guides
 
-- [How to make your LLM API idempotent with ReliAPI](docs/guides/idempotency.md)
-- [How to keep AI costs predictable using budget caps](docs/guides/budget-control.md)
-- [Self-hosted LLM reliability layer in one Docker container](docs/guides/docker.md)
+All guides are available in the [Wiki](https://github.com/KikuAI-Lab/reliapi/wiki):
+
+- [How to make your LLM API idempotent with ReliAPI](https://github.com/KikuAI-Lab/reliapi/wiki/guides/idempotency)
+- [How to keep AI costs predictable using budget caps](https://github.com/KikuAI-Lab/reliapi/wiki/guides/budget-control)
+- [Self-hosted LLM reliability layer in one Docker container](https://github.com/KikuAI-Lab/reliapi/wiki/guides/docker)
 
 ---
 
