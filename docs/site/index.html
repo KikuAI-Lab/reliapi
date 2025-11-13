@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReliAPI - Reliability Layer for HTTP & LLM APIs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .code-block { @apply bg-gray-100 p-4 rounded font-mono text-sm; }
+        .response-box { @apply bg-gray-50 border border-gray-200 p-4 rounded max-h-96 overflow-auto; }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Hero -->
+    <section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold mb-4">ReliAPI</h1>
+            <p class="text-xl mb-2">Reliability layer for HTTP and LLM APIs</p>
+            <p class="text-lg opacity-90">Retries, circuit breaker, cache, idempotency, and budget caps in one small gateway</p>
+            <div class="mt-8">
+                <a href="https://github.com/KikuAI-Lab/reliapi" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold inline-block mr-4">GitHub</a>
+                <a href="#demo" class="bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold inline-block">Try Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white p-8 rounded-lg shadow">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="text-center">
+                            <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                                <span class="text-2xl">👤</span>
+                            </div>
+                            <p class="font-semibold">Client</p>
+                        </div>
+                        <div class="flex-1 h-1 bg-blue-300 mx-4"></div>
+                        <div class="text-center">
+                            <div class="bg-blue-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                                <span class="text-white text-2xl">⚡</span>
+                            </div>
+                            <p class="font-semibold">ReliAPI</p>
+                        </div>
+                        <div class="flex-1 h-1 bg-blue-300 mx-4"></div>
+                        <div class="text-center">
+                            <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                                <span class="text-2xl">🌐</span>
+                            </div>
+                            <p class="font-semibold">Target</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>On error:</strong> Retry with exponential backoff</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>On repeated request:</strong> Use idempotency/cached response</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>On budget risk:</strong> Cap or reject (LLM only)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>On failure:</strong> Circuit breaker prevents cascading failures</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Playground -->
+    <section id="demo" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Interactive Playground</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white p-8 rounded-lg shadow">
+                    <form id="demo-form" class="space-y-4">
+                        <div>
+                            <label class="block font-semibold mb-2">Request Type</label>
+                            <select id="request-type" class="w-full p-2 border rounded">
+                                <option value="http">HTTP Request</option>
+                                <option value="llm">LLM Request</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Target</label>
+                            <input type="text" id="target" value="openai" class="w-full p-2 border rounded" placeholder="e.g., openai, my_api">
+                        </div>
+                        <div id="llm-fields">
+                            <div>
+                                <label class="block font-semibold mb-2">Messages (JSON)</label>
+                                <textarea id="messages" class="w-full p-2 border rounded font-mono text-sm" rows="4">[{"role": "user", "content": "Say hello in one word"}]</textarea>
+                            </div>
+                            <div>
+                                <label class="block font-semibold mb-2">Model (optional)</label>
+                                <input type="text" id="model" value="gpt-4o-mini" class="w-full p-2 border rounded">
+                            </div>
+                        </div>
+                        <div id="http-fields" style="display:none;">
+                            <div>
+                                <label class="block font-semibold mb-2">Method</label>
+                                <select id="method" class="w-full p-2 border rounded">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-semibold mb-2">Path</label>
+                                <input type="text" id="path" value="/get" class="w-full p-2 border rounded">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Idempotency Key (optional)</label>
+                            <input type="text" id="idempotency-key" value="" class="w-full p-2 border rounded" placeholder="e.g., req-123">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold">Send Request</button>
+                    </form>
+                    <div id="response" class="mt-6 hidden">
+                        <h3 class="font-semibold mb-2">Response</h3>
+                        <div class="response-box">
+                            <pre id="response-content" class="text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Reliability & Cost Benefits</h2>
+            <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-4">Error Rate Under Failure Storms</h3>
+                    <canvas id="error-chart"></canvas>
+                    <p class="text-sm text-gray-600 mt-4 italic">Synthetic example illustrating how retries and circuit breaker can reduce errors. Not a guarantee for your workload.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-semibold mb-4">Effective LLM Cost per 1k Requests</h3>
+                    <canvas id="cost-chart"></canvas>
+                    <p class="text-sm text-gray-600 mt-4 italic">Synthetic example illustrating how caching and budget caps can reduce costs. Not a guarantee for your workload.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Compare with Other Tools</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white p-8 rounded-lg shadow overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left p-2">Feature</th>
+                                <th class="text-center p-2">ReliAPI</th>
+                                <th class="text-center p-2">LiteLLM</th>
+                                <th class="text-center p-2">Portkey</th>
+                                <th class="text-center p-2">Helicone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-2">Self-hosted</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">❌</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-2">HTTP Proxy</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">❌</td>
+                                <td class="text-center p-2">❌</td>
+                                <td class="text-center p-2">❌</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-2">Idempotency</td>
+                                <td class="text-center p-2">✅ First-class</td>
+                                <td class="text-center p-2">❌</td>
+                                <td class="text-center p-2">⚠️ Limited</td>
+                                <td class="text-center p-2">❌</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-2">Budget Caps</td>
+                                <td class="text-center p-2">✅ Hard + Soft</td>
+                                <td class="text-center p-2">⚠️ Basic</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2">Streaming</td>
+                                <td class="text-center p-2">❌ Not yet</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">✅</td>
+                                <td class="text-center p-2">✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">ReliAPI - Reliability layer for HTTP & LLM APIs</p>
+            <p class="text-gray-400 text-sm">
+                <a href="https://github.com/KikuAI-Lab/reliapi" class="underline">GitHub</a> |
+                <a href="https://github.com/KikuAI-Lab/reliapi/wiki" class="underline">Wiki</a> |
+                <a href="https://github.com/KikuAI-Lab/reliapi/blob/main/README.md" class="underline">Docs</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle request type fields
+        document.getElementById('request-type').addEventListener('change', (e) => {
+            const isLLM = e.target.value === 'llm';
+            document.getElementById('llm-fields').style.display = isLLM ? 'block' : 'none';
+            document.getElementById('http-fields').style.display = isLLM ? 'none' : 'block';
+        });
+
+        // Demo form submission
+        document.getElementById('demo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('request-type').value;
+            const target = document.getElementById('target').value;
+            const idempotencyKey = document.getElementById('idempotency-key').value;
+
+            let requestBody;
+            if (type === 'llm') {
+                requestBody = {
+                    target: target,
+                    messages: JSON.parse(document.getElementById('messages').value),
+                    model: document.getElementById('model').value || undefined,
+                    idempotency_key: idempotencyKey || undefined
+                };
+            } else {
+                requestBody = {
+                    target: target,
+                    method: document.getElementById('method').value,
+                    path: document.getElementById('path').value,
+                    idempotency_key: idempotencyKey || undefined
+                };
+            }
+
+            // Try to send to local ReliAPI, fallback to mock
+            const url = type === 'llm' ? 'http://localhost:8000/proxy/llm' : 'http://localhost:8000/proxy/http';
+            let response;
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                response = await res.json();
+            } catch (err) {
+                // Fallback to mock response
+                response = {
+                    success: true,
+                    data: type === 'llm' ? {
+                        content: "Hello",
+                        role: "assistant",
+                        finish_reason: "stop"
+                    } : {
+                        status_code: 200,
+                        body: { message: "Success" }
+                    },
+                    meta: {
+                        target: target,
+                        cache_hit: false,
+                        idempotent_hit: idempotencyKey ? Math.random() > 0.7 : false,
+                        retries: 0,
+                        duration_ms: Math.floor(Math.random() * 200) + 50,
+                        request_id: `req_${Date.now()}`,
+                        ...(type === 'llm' ? {
+                            cost_usd: 0.001,
+                            cost_estimate_usd: 0.0012,
+                            cost_policy_applied: "none"
+                        } : {})
+                    }
+                };
+            }
+
+            document.getElementById('response').classList.remove('hidden');
+            document.getElementById('response-content').textContent = JSON.stringify(response, null, 2);
+        });
+
+        // Error rate chart
+        const errorCtx = document.getElementById('error-chart').getContext('2d');
+        new Chart(errorCtx, {
+            type: 'line',
+            data: {
+                labels: ['0s', '10s', '20s', '30s', '40s', '50s'],
+                datasets: [{
+                    label: 'Direct calls',
+                    data: [0, 15, 25, 30, 35, 40],
+                    borderColor: 'rgb(239, 68, 68)',
+                    tension: 0.1
+                }, {
+                    label: 'Retries only',
+                    data: [0, 8, 12, 15, 18, 20],
+                    borderColor: 'rgb(251, 191, 36)',
+                    tension: 0.1
+                }, {
+                    label: 'Retries + Breaker + Cache',
+                    data: [0, 2, 3, 4, 5, 5],
+                    borderColor: 'rgb(34, 197, 94)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: '% Errors' } },
+                    x: { title: { display: true, text: 'Time' } }
+                }
+            }
+        });
+
+        // Cost chart
+        const costCtx = document.getElementById('cost-chart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'bar',
+            data: {
+                labels: ['No cache, no caps', 'Cache only', 'Cache + caps'],
+                datasets: [{
+                    label: 'Cost per 1k requests (USD)',
+                    data: [5.0, 2.5, 1.8],
+                    backgroundColor: ['rgb(239, 68, 68)', 'rgb(251, 191, 36)', 'rgb(34, 197, 94)']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Cost (USD)' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
