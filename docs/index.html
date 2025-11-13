@@ -3,199 +3,795 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReliAPI — Reliability Layer for HTTP & LLM APIs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>ReliAPI — Stability Engine for HTTP and LLM APIs</title>
+    <meta name="description" content="ReliAPI is a small reliability layer for any HTTP API and any LLM API. Retries, circuit breaker, cache, idempotency, and predictable cost controls.">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #17191d;
+            --block: #282f33;
+            --accent: #a89cc4;
+            --primary: #e5e5e5;
+            --secondary: #9ba0a5;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #f87171;
+        }
+
         body {
-            background-color: #17191d;
-            color: #e5e5e5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+            font-size: 18px;
         }
-        .card {
-            background-color: #282f33;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
-        .accent {
-            color: #a89cc4;
+
+        section {
+            padding: 100px 0;
         }
-        .accent-bg {
-            background-color: #a89cc4;
-            color: #17191d;
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .accent-border {
-            border-color: #a89cc4;
-        }
-        .secondary-text {
-            color: #9ba0a5;
-        }
-        .pill-button {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid #a89cc4;
-            background: transparent;
-            color: #a89cc4;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        .pill-button:hover {
-            background-color: #a89cc4;
-            color: #17191d;
-        }
-        .pill-button.active {
-            background-color: #a89cc4;
-            color: #17191d;
-        }
-        .primary-button {
-            background-color: #a89cc4;
-            color: #17191d;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
+
+        h2 {
+            font-size: 2.8rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: var(--primary);
         }
-        .primary-button:hover {
-            opacity: 0.9;
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
         }
-        .input-field {
-            background-color: #17191d;
-            border: 1px solid #3a4145;
-            color: #e5e5e5;
-            padding: 10px 12px;
-            border-radius: 8px;
+
+        p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            max-width: 700px;
+            margin-bottom: 3rem;
+        }
+
+        /* Scene 1: Chaos → ReliAPI → Stability */
+        .scene-1 {
+            background: var(--bg);
+        }
+
+        .stability-engine {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 60px 40px;
+            position: relative;
+        }
+
+        .chaos-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .chaos-zone h3 {
+            color: var(--error);
+            font-size: 1.3rem;
+        }
+
+        .chaos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             width: 100%;
+            max-width: 200px;
         }
-        .input-field:focus {
-            outline: none;
-            border-color: #a89cc4;
+
+        .chaos-square {
+            width: 50px;
+            height: 50px;
+            background: var(--block);
+            border: 2px solid var(--error);
+            border-radius: 6px;
+            position: relative;
+            animation: chaos-jitter 2s infinite;
         }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            background-color: #3a4145;
-            color: #a89cc4;
-            margin: 2px;
+
+        .chaos-square:nth-child(1) { animation-delay: 0s; }
+        .chaos-square:nth-child(2) { animation-delay: 0.15s; }
+        .chaos-square:nth-child(3) { animation-delay: 0.3s; }
+        .chaos-square:nth-child(4) { animation-delay: 0.45s; }
+        .chaos-square:nth-child(5) { animation-delay: 0.6s; }
+        .chaos-square:nth-child(6) { animation-delay: 0.75s; }
+        .chaos-square:nth-child(7) { animation-delay: 0.9s; }
+        .chaos-square:nth-child(8) { animation-delay: 1.05s; }
+        .chaos-square:nth-child(9) { animation-delay: 1.2s; }
+
+        @keyframes chaos-jitter {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+            25% { transform: translate(-8px, -10px) rotate(-5deg); opacity: 0.6; }
+            50% { transform: translate(8px, 10px) rotate(5deg); opacity: 0.7; }
+            75% { transform: translate(-5px, 8px) rotate(-3deg); opacity: 0.65; }
         }
-        .json-viewer {
-            background-color: #17191d;
-            border: 1px solid #3a4145;
-            border-radius: 8px;
-            padding: 16px;
-            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-            font-size: 13px;
+
+        .chaos-square.intense {
+            animation-duration: 0.8s;
+            border-color: var(--error);
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+        }
+
+        .reliapi-engine {
+            width: 140px;
+            height: 240px;
+            background: linear-gradient(180deg, var(--accent), #8b7ba8);
+            border-radius: 24px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(168, 156, 196, 0.6);
+            animation: engine-pulse 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .reliapi-engine::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg, var(--accent), transparent, var(--accent));
+            border-radius: 27px;
+            z-index: -1;
+            opacity: 0.7;
+            animation: rotate-glow 4s linear infinite;
+        }
+
+        .reliapi-engine.active {
+            animation: engine-active 1s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(168, 156, 196, 0.9);
+        }
+
+        @keyframes engine-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(168, 156, 196, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 50px rgba(168, 156, 196, 0.8); }
+        }
+
+        @keyframes engine-active {
+            0%, 100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(168, 156, 196, 0.9); }
+            50% { transform: scale(1.08); box-shadow: 0 0 80px rgba(168, 156, 196, 1); }
+        }
+
+        @keyframes rotate-glow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .reliapi-engine span {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bg);
+            z-index: 1;
+        }
+
+        .engine-ripples {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .ripple {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: ripple-expand 2s ease-out infinite;
+        }
+
+        .ripple:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+        .ripple:nth-child(2) { top: 60%; left: 50%; animation-delay: 0.5s; }
+        .ripple:nth-child(3) { top: 40%; left: 70%; animation-delay: 1s; }
+
+        @keyframes ripple-expand {
+            0% { transform: scale(0); opacity: 0.8; }
+            100% { transform: scale(8); opacity: 0; }
+        }
+
+        .flow-arrow {
+            font-size: 3rem;
+            color: var(--accent);
+            margin: 0 30px;
+            animation: flow-animation 2s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes flow-animation {
+            0%, 100% { opacity: 0.5; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(8px); }
+        }
+
+        .stability-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .stability-zone h3 {
+            color: var(--success);
+            font-size: 1.3rem;
+        }
+
+        .stability-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .stability-rect {
+            width: 50px;
+            height: 50px;
+            background: var(--block);
+            border: 2px solid var(--success);
+            border-radius: 6px;
+            animation: stability-appear 0.6s ease-out;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+        }
+
+        .stability-rect:nth-child(1) { animation-delay: 0.1s; }
+        .stability-rect:nth-child(2) { animation-delay: 0.2s; }
+        .stability-rect:nth-child(3) { animation-delay: 0.3s; }
+        .stability-rect:nth-child(4) { animation-delay: 0.4s; }
+        .stability-rect:nth-child(5) { animation-delay: 0.5s; }
+        .stability-rect:nth-child(6) { animation-delay: 0.6s; }
+        .stability-rect:nth-child(7) { animation-delay: 0.7s; }
+        .stability-rect:nth-child(8) { animation-delay: 0.8s; }
+        .stability-rect:nth-child(9) { animation-delay: 0.9s; }
+
+        @keyframes stability-appear {
+            0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .cta-button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 50px auto 0;
+            display: block;
+            box-shadow: 0 4px 15px rgba(168, 156, 196, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(168, 156, 196, 0.5);
+        }
+
+        /* Scene 2: Interactive Reliability Toggles */
+        .scene-2 {
+            background: var(--block);
+        }
+
+        .reliability-toggles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto 50px;
+        }
+
+        .toggle-button {
+            background: var(--bg);
+            border: 2px solid var(--accent);
+            color: var(--primary);
+            padding: 28px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-button:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 25px rgba(168, 156, 196, 0.4);
+            transform: translateY(-4px);
+        }
+
+        .toggle-button.active {
+            border-color: var(--success);
+            background: rgba(74, 222, 128, 0.1);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+        }
+
+        .animation-display {
+            min-height: 350px;
+            background: var(--bg);
+            border-radius: 18px;
+            padding: 50px;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(168, 156, 196, 0.2);
+        }
+
+        .animation-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .response-envelope {
+            margin-top: 40px;
+            padding: 24px;
+            background: var(--block);
+            border-radius: 12px;
+            border-left: 4px solid var(--success);
+            display: none;
+        }
+
+        .response-envelope.expanded {
+            display: block;
+        }
+
+        .response-envelope pre {
+            color: var(--secondary);
+            font-size: 0.95rem;
             overflow-x: auto;
-            max-height: 400px;
-            overflow-y: auto;
+            line-height: 1.6;
         }
-        .highlight {
-            background-color: rgba(168, 156, 196, 0.2);
-            padding: 2px 4px;
-            border-radius: 3px;
+
+        .toggle-details {
+            margin-top: 30px;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-details:hover {
+            background: rgba(168, 156, 196, 0.1);
+        }
+
+        /* Scene 3: Why it matters */
+        .scene-3 {
+            background: var(--bg);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            background: var(--block);
+            border-radius: 18px;
+            padding: 40px;
+            border: 1px solid rgba(168, 156, 196, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(168, 156, 196, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .benefit-card h3 {
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .benefit-card p {
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+
+        /* Scene 4: Charts */
+        .scene-4 {
+            background: var(--block);
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .chart-card {
+            background: var(--bg);
+            border-radius: 18px;
+            padding: 40px;
+            border: 1px solid rgba(168, 156, 196, 0.2);
+        }
+
+        .chart-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .chart-visual {
+            height: 280px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 30px 0;
+        }
+
+        .chart-bar {
+            width: 50px;
+            background: var(--accent);
+            border-radius: 6px 6px 0 0;
+            transition: height 0.8s ease;
+            position: relative;
+            box-shadow: 0 -4px 12px rgba(168, 156, 196, 0.3);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: var(--secondary);
+            white-space: nowrap;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Scene 5: Comparison */
+        .scene-5 {
+            background: var(--bg);
+        }
+
+        .comparison-table {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--block);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(168, 156, 196, 0.2);
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 220px repeat(4, 1fr);
+            padding: 24px;
+            border-bottom: 1px solid rgba(168, 156, 196, 0.1);
+            align-items: center;
+            font-size: 1.05rem;
+        }
+
+        .table-row:first-child {
+            background: var(--bg);
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .status-marker.green { 
+            background: var(--success);
+            color: var(--success);
+        }
+        .status-marker.yellow { 
+            background: var(--warning);
+            color: var(--warning);
+        }
+        .status-marker.red { 
+            background: var(--error);
+            color: var(--error);
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 24px;
+            background: var(--bg);
+            text-align: center;
+            border-top: 1px solid rgba(168, 156, 196, 0.1);
+        }
+
+        footer p {
+            color: var(--secondary);
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+            margin: 0 12px;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            body { font-size: 16px; }
+            
+            .stability-engine {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+
+            .reliability-toggles {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-row {
+                grid-template-columns: 150px repeat(4, 1fr);
+                font-size: 0.9rem;
+                padding: 16px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Hero -->
-    <section class="py-16 px-4">
-        <div class="max-w-6xl mx-auto text-center">
-            <p class="secondary-text text-sm uppercase tracking-wide mb-2">Reliability layer for HTTP and LLM APIs</p>
-            <h1 class="text-5xl font-bold mb-4">Reliability you can see</h1>
-            <p class="secondary-text text-lg max-w-2xl mx-auto">
-                Interactive demo showing how ReliAPI handles retries, idempotency, caching, and budget caps for HTTP & LLM calls.
-            </p>
+    <section class="hero">
+        <div class="container">
+            <h1>ReliAPI</h1>
+            <p>Most APIs fail sometimes. ReliAPI keeps them stable.</p>
         </div>
     </section>
 
-    <!-- Interactive Playground -->
-    <section class="px-4 pb-16">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Controls (Left) -->
-                <div class="card">
-                    <h2 class="text-2xl font-bold mb-6">Playground</h2>
-                    
-                    <!-- Mode Toggle -->
-                    <div class="mb-6">
-                        <label class="block secondary-text text-sm mb-2">Request Type</label>
-                        <div class="flex gap-2">
-                            <button class="pill-button active" data-mode="http">HTTP request</button>
-                            <button class="pill-button" data-mode="llm">LLM request</button>
-                        </div>
+    <!-- Scene 1: Chaos → ReliAPI → Stability -->
+    <section class="scene-1" id="scene-1">
+        <div class="container">
+            <div class="stability-engine">
+                <div class="chaos-zone">
+                    <h3>Chaos</h3>
+                    <div class="chaos-grid" id="chaos-grid">
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
+                        <div class="chaos-square"></div>
                     </div>
-
-                    <!-- Scenarios -->
-                    <div class="mb-6">
-                        <label class="block secondary-text text-sm mb-2">Scenarios</label>
-                        <div class="flex flex-wrap gap-2">
-                            <button class="pill-button active" data-scenario="normal">Normal request</button>
-                            <button class="pill-button" data-scenario="errors">Provider errors</button>
-                            <button class="pill-button" data-scenario="ratelimit">Rate limit storm</button>
-                            <button class="pill-button" data-scenario="idempotent">Idempotent repeat</button>
-                            <button class="pill-button" data-scenario="budget">Budget cap hit</button>
-                        </div>
-                    </div>
-
-                    <!-- Config Inputs -->
-                    <div class="space-y-4 mb-6">
-                        <div>
-                            <label class="block secondary-text text-sm mb-2">Target</label>
-                            <input type="text" id="target" value="openai" class="input-field" placeholder="e.g., openai, my_api">
-                        </div>
-                        <div>
-                            <label class="block secondary-text text-sm mb-2">Idempotency-Key (optional)</label>
-                            <input type="text" id="idempotency-key" value="" class="input-field" placeholder="e.g., req-123">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="use-live" class="w-4 h-4 accent-bg">
-                            <label for="use-live" class="secondary-text text-sm">Use live ReliAPI</label>
-                        </div>
-                        <div id="live-url-container" style="display: none;">
-                            <label class="block secondary-text text-sm mb-2">ReliAPI base URL</label>
-                            <input type="text" id="live-url" value="http://localhost:8000" class="input-field">
-                        </div>
-                    </div>
-
-                    <button id="run-scenario" class="primary-button w-full">Run scenario</button>
                 </div>
+                <div class="flow-arrow">→</div>
+                <div class="reliapi-engine" id="reliapi-engine">
+                    <div class="engine-ripples">
+                        <div class="ripple"></div>
+                        <div class="ripple"></div>
+                        <div class="ripple"></div>
+                    </div>
+                    <span>ReliAPI</span>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="stability-zone">
+                    <h3>Stability</h3>
+                    <div class="stability-grid">
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                        <div class="stability-rect"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="cta-button" onclick="document.getElementById('scene-2').scrollIntoView({behavior: 'smooth'})">
+                See how it works
+            </button>
+        </div>
+    </section>
 
-                <!-- Visual & JSON (Right) -->
-                <div class="card">
-                    <h2 class="text-2xl font-bold mb-6">Response</h2>
-                    
-                    <!-- Flow Diagram -->
-                    <div class="mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="text-center">
-                                <div class="bg-[#3a4145] rounded-lg p-4 mb-2">Client</div>
-                            </div>
-                            <div class="flex-1 h-1 bg-[#3a4145] mx-4"></div>
-                            <div class="text-center">
-                                <div class="accent-bg rounded-lg p-4 mb-2 font-semibold">ReliAPI</div>
-                            </div>
-                            <div class="flex-1 h-1 bg-[#3a4145] mx-4"></div>
-                            <div class="text-center">
-                                <div class="bg-[#3a4145] rounded-lg p-4 mb-2">Target</div>
-                            </div>
+    <!-- Scene 2: Interactive Reliability Toggles -->
+    <section class="scene-2" id="scene-2">
+        <div class="container">
+            <h2>Test Reliability</h2>
+            <div class="reliability-toggles">
+                <button class="toggle-button" onclick="toggleReliability('errors')">
+                    Provider Errors
+                </button>
+                <button class="toggle-button" onclick="toggleReliability('ratelimit')">
+                    Rate Limits
+                </button>
+                <button class="toggle-button" onclick="toggleReliability('storm')">
+                    Request Storm
+                </button>
+                <button class="toggle-button" onclick="toggleReliability('budget')">
+                    Budget Cap Hit
+                </button>
+            </div>
+            <div class="animation-display" id="animation-display">
+                <div class="animation-content">
+                    <p style="color: var(--secondary); text-align: center; font-size: 1.1rem;">
+                        Toggle a reliability test above to see ReliAPI in action
+                    </p>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <button class="toggle-details" onclick="toggleResponseEnvelope()">
+                    Show technical response envelope
+                </button>
+            </div>
+            <div class="response-envelope" id="response-envelope">
+                <pre>{
+  "success": true,
+  "data": {
+    "content": "Stable response despite upstream issues"
+  },
+  "meta": {
+    "target": "example_api",
+    "cache_hit": false,
+    "idempotent_hit": false,
+    "retries": 2,
+    "duration_ms": 450,
+    "fallback_used": true,
+    "fallback_target": "backup_api"
+  }
+}</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scene 3: Why it matters -->
+    <section class="scene-3" id="scene-3">
+        <div class="container">
+            <h2>Why it matters</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <h3>App stays online</h3>
+                    <p>Even during provider outages, your app keeps running. ReliAPI automatically routes to backup services.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Predictable costs</h3>
+                    <p>LLM costs remain predictable with budget caps. No surprise bills from runaway API calls.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Automatic reliability</h3>
+                    <p>Retry, circuit breaker, and cache happen automatically. You don't need to code resilience yourself.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scene 4: Charts -->
+    <section class="scene-4" id="scene-4">
+        <div class="container">
+            <h2>Measured impact</h2>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>Error Rate</h3>
+                    <div class="chart-visual">
+                        <div class="chart-bar" style="height: 80%;">
+                            <span class="chart-bar-value">20%</span>
+                            <span class="chart-bar-label">Direct API</span>
                         </div>
-                        <div id="badges" class="flex flex-wrap gap-2">
-                            <span class="badge">cache_miss</span>
-                            <span class="badge">idempotent_hit=false</span>
-                            <span class="badge">cost_policy_applied=none</span>
+                        <div class="chart-bar" style="height: 5%;">
+                            <span class="chart-bar-value">1%</span>
+                            <span class="chart-bar-label">With ReliAPI</span>
                         </div>
                     </div>
-
-                    <!-- JSON Viewer -->
-                    <div>
-                        <label class="block secondary-text text-sm mb-2">Response Envelope</label>
-                        <div class="json-viewer" id="json-response">
-                            <pre class="text-[#9ba0a5]">Select a scenario and click "Run scenario"</pre>
+                </div>
+                <div class="chart-card">
+                    <h3>Cost Predictability</h3>
+                    <div class="chart-visual">
+                        <div class="chart-bar" style="height: 70%;">
+                            <span class="chart-bar-value">±30%</span>
+                            <span class="chart-bar-label">Direct API</span>
+                        </div>
+                        <div class="chart-bar" style="height: 10%;">
+                            <span class="chart-bar-value">±2%</span>
+                            <span class="chart-bar-label">With ReliAPI</span>
                         </div>
                     </div>
                 </div>
@@ -203,514 +799,249 @@
         </div>
     </section>
 
-    <!-- Charts Section -->
-    <section class="px-4 pb-16">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold text-center mb-12">Why it matters</h2>
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Chart 1 -->
-                <div class="card">
-                    <h3 class="text-xl font-semibold mb-4">Error rate under failure storms</h3>
-                    <canvas id="error-chart"></canvas>
-                    <p class="secondary-text text-xs mt-4 italic">
-                        This is a synthetic example showing how retries and circuit breakers can reduce observed error rates during provider issues. It is not a benchmark of your environment.
-                    </p>
+    <!-- Scene 5: Comparison -->
+    <section class="scene-5" id="scene-5">
+        <div class="container">
+            <h2>ReliAPI vs Others</h2>
+            <div class="comparison-table">
+                <div class="table-row">
+                    <div>Feature</div>
+                    <div style="text-align: center;">ReliAPI</div>
+                    <div style="text-align: center;">LiteLLM</div>
+                    <div style="text-align: center;">Portkey</div>
+                    <div style="text-align: center;">Helicone</div>
                 </div>
-                <!-- Chart 2 -->
-                <div class="card">
-                    <h3 class="text-xl font-semibold mb-4">Effective LLM cost per 1k requests</h3>
-                    <canvas id="cost-chart"></canvas>
-                    <p class="secondary-text text-xs mt-4 italic">
-                        Example of how caching and budget caps can improve predictability of LLM costs. Numbers are illustrative, not a performance guarantee.
-                    </p>
+                <div class="table-row">
+                    <div>Self-hosted</div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker red"></div></div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Comparison Block -->
-    <section class="px-4 pb-16">
-        <div class="max-w-4xl mx-auto">
-            <div class="card">
-                <h2 class="text-2xl font-bold mb-4">How ReliAPI fits among other tools</h2>
-                <p class="secondary-text mb-6">
-                    ReliAPI is not a replacement for full AI platforms, but a small self-hosted reliability layer focused on stability and simplicity. It works for any HTTP API, not just LLMs.
-                </p>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-[#3a4145]">
-                                <th class="text-left p-3 secondary-text text-sm font-semibold">Feature</th>
-                                <th class="text-center p-3 secondary-text text-sm font-semibold">ReliAPI</th>
-                                <th class="text-center p-3 secondary-text text-sm font-semibold">LiteLLM</th>
-                                <th class="text-center p-3 secondary-text text-sm font-semibold">Portkey</th>
-                                <th class="text-center p-3 secondary-text text-sm font-semibold">Helicone</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-[#3a4145]">
-                                <td class="p-3">Self-hosted</td>
-                                <td class="text-center p-3 accent">✅</td>
-                                <td class="text-center p-3 secondary-text">✅</td>
-                                <td class="text-center p-3 secondary-text">✅</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                            </tr>
-                            <tr class="border-b border-[#3a4145]">
-                                <td class="p-3">HTTP + LLM</td>
-                                <td class="text-center p-3 accent">✅</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                            </tr>
-                            <tr class="border-b border-[#3a4145]">
-                                <td class="p-3">First-class idempotency</td>
-                                <td class="text-center p-3 accent">✅</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                                <td class="text-center p-3 secondary-text">⚠️</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                            </tr>
-                            <tr class="border-b border-[#3a4145]">
-                                <td class="p-3">Budget caps for LLM</td>
-                                <td class="text-center p-3 accent">✅</td>
-                                <td class="text-center p-3 secondary-text">⚠️</td>
-                                <td class="text-center p-3 secondary-text">✅</td>
-                                <td class="text-center p-3 secondary-text">✅</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3">Minimal configuration</td>
-                                <td class="text-center p-3 accent">✅</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                                <td class="text-center p-3 secondary-text">❌</td>
-                                <td class="text-center p-3 secondary-text">N/A</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="table-row">
+                    <div>HTTP + LLM</div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker red"></div></div>
+                    <div><div class="status-marker red"></div></div>
+                    <div><div class="status-marker red"></div></div>
+                </div>
+                <div class="table-row">
+                    <div>Idempotency</div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker red"></div></div>
+                    <div><div class="status-marker yellow"></div></div>
+                    <div><div class="status-marker red"></div></div>
+                </div>
+                <div class="table-row">
+                    <div>Budget caps</div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker yellow"></div></div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker green"></div></div>
+                </div>
+                <div class="table-row">
+                    <div>Minimal config</div>
+                    <div><div class="status-marker green"></div></div>
+                    <div><div class="status-marker yellow"></div></div>
+                    <div><div class="status-marker yellow"></div></div>
+                    <div><div class="status-marker yellow"></div></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="px-4 py-8 border-t border-[#3a4145]">
-        <div class="max-w-6xl mx-auto text-center">
-            <p class="secondary-text mb-2">ReliAPI — Reliability layer for HTTP and LLM calls</p>
-            <p class="secondary-text text-sm">
-                <a href="https://github.com/KikuAI-Lab/reliapi" class="accent hover:underline">GitHub</a> |
-                <a href="https://github.com/KikuAI-Lab/reliapi/wiki" class="accent hover:underline">Wiki</a> |
-                <a href="https://github.com/KikuAI-Lab/reliapi/blob/main/README.md" class="accent hover:underline">Docs</a>
+    <footer>
+        <div class="container">
+            <p><strong>ReliAPI</strong> — Stability Engine for HTTP and LLM calls. Simple, predictable, stable.</p>
+            <p>
+                <a href="https://github.com/KikuAI-Lab/reliapi">GitHub</a>
+                <a href="https://github.com/KikuAI-Lab/reliapi/wiki">Documentation</a>
+                <a href="https://kikuai.dev">KikuAI Lab</a>
             </p>
         </div>
     </footer>
 
     <script>
-        // State
-        let currentMode = 'http';
-        let currentScenario = 'normal';
-        let useLive = false;
+        let activeToggle = null;
+        let chaosIntensity = 0;
 
-        // Mock responses for each scenario
-        const mockResponses = {
-            http: {
-                normal: {
-                    success: true,
-                    data: {
-                        status_code: 200,
-                        headers: {},
-                        body: { message: "Success", data: "example response" }
-                    },
-                    meta: {
-                        target: "my_api",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 0,
-                        duration_ms: 150,
-                        request_id: "req_123456"
-                    }
-                },
-                errors: {
-                    success: false,
-                    error: {
-                        type: "upstream_error",
-                        code: "TIMEOUT",
-                        message: "Request timed out after retries",
-                        retryable: true,
-                        target: "my_api",
-                        status_code: 504
-                    },
-                    meta: {
-                        target: "my_api",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 3,
-                        duration_ms: 20000,
-                        request_id: "req_123457"
-                    }
-                },
-                ratelimit: {
-                    success: false,
-                    error: {
-                        type: "upstream_error",
-                        code: "RATE_LIMIT",
-                        message: "Rate limit exceeded, circuit breaker open",
-                        retryable: true,
-                        target: "my_api",
-                        status_code: 429
-                    },
-                    meta: {
-                        target: "my_api",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 3,
-                        duration_ms: 5000,
-                        request_id: "req_123458"
-                    }
-                },
-                idempotent: {
-                    success: true,
-                    data: {
-                        status_code: 200,
-                        headers: {},
-                        body: { message: "Success", data: "example response" }
-                    },
-                    meta: {
-                        target: "my_api",
-                        cache_hit: true,
-                        idempotent_hit: true,
-                        retries: 0,
-                        duration_ms: 5,
-                        request_id: "req_123459"
-                    }
-                },
-                budget: {
-                    success: false,
-                    error: {
-                        type: "budget_error",
-                        code: "BUDGET_EXCEEDED",
-                        message: "Estimated cost exceeds hard cap",
-                        retryable: false,
-                        target: "my_api",
-                        status_code: 400
-                    },
-                    meta: {
-                        target: "my_api",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 0,
-                        duration_ms: 10,
-                        request_id: "req_123460"
+        function toggleReliability(type) {
+            const buttons = document.querySelectorAll('.toggle-button');
+            const engine = document.getElementById('reliapi-engine');
+            const chaosGrid = document.getElementById('chaos-grid');
+            const display = document.getElementById('animation-display');
+            
+            // Toggle button state
+            buttons.forEach(btn => {
+                if (btn.textContent.trim() === event.target.textContent.trim()) {
+                    if (btn.classList.contains('active')) {
+                        btn.classList.remove('active');
+                        activeToggle = null;
+                        chaosIntensity = 0;
+                        engine.classList.remove('active');
+                        resetChaos();
+                        display.querySelector('.animation-content').innerHTML = 
+                            '<p style="color: var(--secondary); text-align: center; font-size: 1.1rem;">Toggle a reliability test above to see ReliAPI in action</p>';
+                    } else {
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        activeToggle = type;
+                        chaosIntensity = 1;
+                        engine.classList.add('active');
+                        increaseChaos();
+                        showAnimation(type, display);
                     }
                 }
-            },
-            llm: {
-                normal: {
-                    success: true,
-                    data: {
-                        content: "Hello! How can I help you today?",
-                        role: "assistant",
-                        finish_reason: "stop"
-                    },
-                    meta: {
-                        target: "openai",
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 0,
-                        duration_ms: 1200,
-                        request_id: "req_123461",
-                        cost_usd: 0.001,
-                        cost_estimate_usd: 0.0012,
-                        cost_policy_applied: "none"
-                    }
-                },
-                errors: {
-                    success: false,
-                    error: {
-                        type: "upstream_error",
-                        code: "PROVIDER_ERROR",
-                        message: "Provider error after retries, fallback used",
-                        retryable: true,
-                        target: "openai",
-                        status_code: 500
-                    },
-                    meta: {
-                        target: "openai",
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 3,
-                        duration_ms: 15000,
-                        request_id: "req_123462",
-                        fallback_used: true,
-                        fallback_target: "anthropic"
-                    }
-                },
-                ratelimit: {
-                    success: false,
-                    error: {
-                        type: "upstream_error",
-                        code: "RATE_LIMIT",
-                        message: "Rate limit exceeded, circuit breaker open",
-                        retryable: true,
-                        target: "openai",
-                        status_code: 429
-                    },
-                    meta: {
-                        target: "openai",
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 3,
-                        duration_ms: 8000,
-                        request_id: "req_123463"
-                    }
-                },
-                idempotent: {
-                    success: true,
-                    data: {
-                        content: "Hello! How can I help you today?",
-                        role: "assistant",
-                        finish_reason: "stop"
-                    },
-                    meta: {
-                        target: "openai",
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        cache_hit: true,
-                        idempotent_hit: true,
-                        retries: 0,
-                        duration_ms: 3,
-                        request_id: "req_123464",
-                        cost_usd: 0.001,
-                        cost_estimate_usd: 0.0012,
-                        cost_policy_applied: "none"
-                    }
-                },
-                budget: {
-                    success: false,
-                    error: {
-                        type: "budget_error",
-                        code: "BUDGET_EXCEEDED",
-                        message: "Estimated cost $0.012 exceeds hard cap $0.05",
-                        retryable: false,
-                        target: "openai",
-                        status_code: 400,
-                        details: {
-                            cost_estimate_usd: 0.012,
-                            hard_cost_cap_usd: 0.05,
-                            model: "gpt-4o-mini",
-                            max_tokens: 2000
+            });
+        }
+
+        function increaseChaos() {
+            const squares = document.querySelectorAll('.chaos-square');
+            squares.forEach(sq => {
+                sq.classList.add('intense');
+            });
+        }
+
+        function resetChaos() {
+            const squares = document.querySelectorAll('.chaos-square');
+            squares.forEach(sq => {
+                sq.classList.remove('intense');
+            });
+        }
+
+        function showAnimation(type, container) {
+            const content = container.querySelector('.animation-content');
+            
+            switch(type) {
+                case 'errors':
+                    content.innerHTML = `
+                        <div style="position: relative; width: 100%; height: 250px;">
+                            <div style="position: absolute; left: 15%; top: 50%; transform: translateY(-50%);">
+                                <div style="width: 70px; height: 70px; background: var(--error); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; animation: pulse 1s infinite;">
+                                    API
+                                </div>
+                                <p style="text-align: center; margin-top: 12px; color: var(--error); font-size: 0.95rem;">Error</p>
+                            </div>
+                            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                                <div style="font-size: 2.5rem; color: var(--accent);">→</div>
+                            </div>
+                            <div style="position: absolute; right: 15%; top: 50%; transform: translateY(-50%);">
+                                <div style="width: 70px; height: 70px; background: var(--success); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem;">
+                                    Backup
+                                </div>
+                                <p style="text-align: center; margin-top: 12px; color: var(--success); font-size: 0.95rem;">Active</p>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 30px; color: var(--secondary); font-size: 1.05rem;">
+                            Provider fails → ReliAPI routes to backup → Output stays clean
+                        </p>
+                    `;
+                    break;
+                    
+                case 'ratelimit':
+                    content.innerHTML = `
+                        <div style="position: relative; width: 100%; height: 250px;">
+                            <div style="position: absolute; left: 15%; top: 50%; transform: translateY(-50%);">
+                                <div style="width: 90px; height: 90px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.8rem; animation: pulse 1s infinite;">
+                                    429
+                                </div>
+                            </div>
+                            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                                <div style="width: 90px; height: 90px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--bg); font-weight: 700; font-size: 1.2rem; box-shadow: 0 0 25px rgba(168, 156, 196, 0.6);">
+                                    R
+                                </div>
+                            </div>
+                            <div style="position: absolute; right: 15%; top: 50%; transform: translateY(-50%);">
+                                <div style="width: 70px; height: 70px; background: var(--success); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem;">
+                                    OK
+                                </div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 30px; color: var(--secondary); font-size: 1.05rem;">
+                            Rate limit hit → ReliAPI backs off & retries → Success
+                        </p>
+                    `;
+                    break;
+                    
+                case 'storm':
+                    content.innerHTML = `
+                        <div style="position: relative; width: 100%; height: 250px;">
+                            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px;">
+                                <div style="width: 100px; height: 100px; background: var(--accent); border-radius: 50%; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--bg); font-size: 1.3rem; box-shadow: 0 0 30px rgba(168, 156, 196, 0.7);">
+                                    <div style="position: absolute; width: 120px; height: 120px; border: 2px solid var(--accent); border-radius: 50%; top: -10px; left: -10px; animation: ring-expand 1.5s ease-out infinite;"></div>
+                                    <div style="position: absolute; width: 140px; height: 140px; border: 2px solid var(--accent); border-radius: 50%; top: -20px; left: -20px; animation: ring-expand 1.5s ease-out infinite; animation-delay: 0.3s;"></div>
+                                    R
+                                </div>
+                            </div>
+                            ${Array.from({length: 12}, (_, i) => `
+                                <div style="position: absolute; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; left: ${i * 8}%; top: ${50 + Math.sin(i * 0.5) * 40}%; animation: packet-flow 2s ease-in-out infinite; animation-delay: ${i * 0.15}s; opacity: 0.7;"></div>
+                            `).join('')}
+                        </div>
+                        <p style="text-align: center; margin-top: 30px; color: var(--secondary); font-size: 1.05rem;">
+                            Request storm → ReliAPI retries & fallback → Stable output
+                        </p>
+                        <style>
+                            @keyframes packet-flow {
+                                0% { transform: translateX(-250px) translateY(0); opacity: 0.8; }
+                                50% { transform: translateX(0) translateY(-15px); opacity: 0.6; }
+                                100% { transform: translateX(250px) translateY(0); opacity: 0; }
+                            }
+                            @keyframes ring-expand {
+                                0% { transform: scale(0.9); opacity: 0.8; }
+                                100% { transform: scale(1.3); opacity: 0; }
+                            }
+                        </style>
+                    `;
+                    break;
+                    
+                case 'budget':
+                    content.innerHTML = `
+                        <div style="position: relative; width: 100%; height: 250px;">
+                            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 350px;">
+                                <div style="background: var(--block); height: 40px; border-radius: 20px; overflow: hidden; position: relative; border: 2px solid var(--accent);">
+                                    <div id="budget-bar" style="background: linear-gradient(90deg, var(--accent), var(--warning)); height: 100%; width: 0%; transition: width 1.5s ease; border-radius: 18px;"></div>
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--primary); font-weight: 600; font-size: 1rem;">Budget Cap</div>
+                                </div>
+                                <div style="margin-top: 25px; text-align: center;">
+                                    <div style="color: var(--secondary); font-size: 1rem;">Cost: <span id="cost-value" style="color: var(--primary); font-weight: 600;">$0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 30px; color: var(--secondary); font-size: 1.05rem;">
+                            Budget overflow → ReliAPI trims tokens → Stays within limit
+                        </p>
+                    `;
+                    
+                    setTimeout(() => {
+                        const bar = document.getElementById('budget-bar');
+                        const cost = document.getElementById('cost-value');
+                        if (bar && cost) {
+                            bar.style.width = '95%';
+                            cost.textContent = '$0.048';
+                            setTimeout(() => {
+                                bar.style.width = '45%';
+                                bar.style.background = 'var(--accent)';
+                                cost.textContent = '$0.022';
+                            }, 2000);
                         }
-                    },
-                    meta: {
-                        target: "openai",
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        cache_hit: false,
-                        idempotent_hit: false,
-                        retries: 0,
-                        duration_ms: 15,
-                        request_id: "req_123465",
-                        cost_estimate_usd: 0.012,
-                        cost_policy_applied: "hard_cap_rejected"
-                    }
-                }
+                    }, 200);
+                    break;
             }
-        };
-
-        // Badge mappings for scenarios
-        const scenarioBadges = {
-            normal: ['cache_miss', 'idempotent_hit=false', 'cost_policy_applied=none'],
-            errors: ['retries=3', 'fallback_used=true'],
-            ratelimit: ['circuit_open=true', 'error_type=RATE_LIMIT'],
-            idempotent: ['idempotent_hit=true', 'cache_hit=true'],
-            budget: ['cost_policy_applied=hard_cap_rejected']
-        };
-
-        // Mode toggle
-        document.querySelectorAll('[data-mode]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentMode = btn.dataset.mode;
-            });
-        });
-
-        // Scenario toggle
-        document.querySelectorAll('[data-scenario]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-scenario]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentScenario = btn.dataset.scenario;
-                updateBadges();
-            });
-        });
-
-        // Live toggle
-        document.getElementById('use-live').addEventListener('change', (e) => {
-            useLive = e.target.checked;
-            document.getElementById('live-url-container').style.display = useLive ? 'block' : 'none';
-        });
-
-        // Update badges
-        function updateBadges() {
-            const badges = scenarioBadges[currentScenario] || [];
-            const container = document.getElementById('badges');
-            container.innerHTML = badges.map(b => `<span class="badge">${b}</span>`).join('');
         }
 
-        // Format JSON with highlighting
-        function formatJSON(obj) {
-            const jsonStr = JSON.stringify(obj, null, 2);
-            const highlighted = jsonStr
-                .replace(/("idempotent_hit":\s*)(true|false)/g, '$1<span class="highlight">$2</span>')
-                .replace(/("cache_hit":\s*)(true|false)/g, '$1<span class="highlight">$2</span>')
-                .replace(/("cost_usd":\s*)([\d.]+)/g, '$1<span class="highlight">$2</span>')
-                .replace(/("cost_estimate_usd":\s*)([\d.]+)/g, '$1<span class="highlight">$2</span>')
-                .replace(/("cost_policy_applied":\s*)"([^"]+)"/g, '$1<span class="highlight">"$2"</span>')
-                .replace(/("retries":\s*)(\d+)/g, '$1<span class="highlight">$2</span>');
-            return highlighted;
-        }
-
-        // Run scenario
-        document.getElementById('run-scenario').addEventListener('click', async () => {
-            const target = document.getElementById('target').value;
-            const idempotencyKey = document.getElementById('idempotency-key').value;
-            const liveUrl = document.getElementById('live-url').value;
-
-            let response;
-            let warning = '';
-
-            if (useLive) {
-                try {
-                    const endpoint = currentMode === 'llm' ? '/proxy/llm' : '/proxy/http';
-                    const payload = currentMode === 'llm' 
-                        ? {
-                            target: target,
-                            messages: [{"role": "user", "content": "Hello"}],
-                            model: "gpt-4o-mini",
-                            idempotency_key: idempotencyKey || undefined
-                        }
-                        : {
-                            target: target,
-                            method: "GET",
-                            path: "/get",
-                            idempotency_key: idempotencyKey || undefined
-                        };
-
-                    const res = await fetch(`${liveUrl}${endpoint}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    response = await res.json();
-                } catch (err) {
-                    warning = 'Live call failed, showing simulated response.';
-                    response = mockResponses[currentMode][currentScenario];
-                    // Update target in mock response
-                    if (response.meta) response.meta.target = target;
-                }
+        function toggleResponseEnvelope() {
+            const envelope = document.getElementById('response-envelope');
+            const button = event.target;
+            
+            if (envelope.classList.contains('expanded')) {
+                envelope.classList.remove('expanded');
+                button.textContent = 'Show technical response envelope';
             } else {
-                response = JSON.parse(JSON.stringify(mockResponses[currentMode][currentScenario]));
-                if (response.meta) response.meta.target = target;
+                envelope.classList.add('expanded');
+                button.textContent = 'Hide technical response envelope';
             }
-
-            // Update JSON viewer
-            const jsonViewer = document.getElementById('json-response');
-            jsonViewer.innerHTML = `<pre>${warning ? `<span class="secondary-text italic">${warning}</span>\n\n` : ''}${formatJSON(response)}</pre>`;
-
-            // Update badges
-            updateBadges();
-        });
-
-        // Charts
-        Chart.defaults.color = '#9ba0a5';
-        Chart.defaults.borderColor = '#3a4145';
-
-        // Error rate chart
-        const errorCtx = document.getElementById('error-chart').getContext('2d');
-        new Chart(errorCtx, {
-            type: 'line',
-            data: {
-                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-                datasets: [{
-                    label: 'Direct calls',
-                    data: [0, 15, 25, 30, 35, 40, 42, 45, 48, 50],
-                    borderColor: '#ef4444',
-                    backgroundColor: 'transparent',
-                    tension: 0.1
-                }, {
-                    label: 'With retries only',
-                    data: [0, 8, 12, 15, 18, 20, 22, 24, 25, 26],
-                    borderColor: '#f59e0b',
-                    backgroundColor: 'transparent',
-                    tension: 0.1
-                }, {
-                    label: 'With retries + circuit breaker + cache (ReliAPI-like)',
-                    data: [0, 2, 3, 4, 5, 5, 5, 5, 5, 5],
-                    borderColor: '#a89cc4',
-                    backgroundColor: 'transparent',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        labels: { color: '#9ba0a5' }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: '% failed requests', color: '#9ba0a5' },
-                        grid: { color: '#3a4145' }
-                    },
-                    x: {
-                        title: { display: true, text: 'Request window', color: '#9ba0a5' },
-                        grid: { color: '#3a4145' }
-                    }
-                }
-            }
-        });
-
-        // Cost chart
-        const costCtx = document.getElementById('cost-chart').getContext('2d');
-        new Chart(costCtx, {
-            type: 'bar',
-            data: {
-                labels: ['No cache, no caps', 'Cache only', 'Cache + budget caps'],
-                datasets: [{
-                    label: 'Cost per 1k requests (USD)',
-                    data: [5.0, 2.5, 1.8],
-                    backgroundColor: ['#ef4444', '#f59e0b', '#a89cc4']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Cost (USD)', color: '#9ba0a5' },
-                        grid: { color: '#3a4145' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#9ba0a5' }
-                    }
-                }
-            }
-        });
-
-        // Initialize
-        updateBadges();
+        }
     </script>
 </body>
 </html>

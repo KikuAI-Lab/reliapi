@@ -2,11 +2,9 @@
 
 ## What is ReliAPI?
 
-ReliAPI is a small reliability layer for **any HTTP API** — REST services, internal microservices, and LLM calls. It provides retries, circuit breaker, cache, idempotency, and predictable cost controls in a single, self-hostable gateway.
+ReliAPI is a small reliability layer for **ANY HTTP API and ANY LLM API**. It provides retries, circuit breaker, cache, idempotency, and predictable cost controls in a single, self-hostable gateway.
 
-**ReliAPI is not limited to LLM calls.**
-
-It can sit in front of *any* HTTP-based API — payment services, SaaS APIs, internal microservices — and apply the same retry, circuit breaker, cache, idempotency, and error handling policies in a uniform way.
+**ReliAPI works for any HTTP-based API** — payment services, SaaS APIs, internal microservices, and LLM providers. It applies the same retry, circuit breaker, cache, idempotency, and error handling policies uniformly across all API types.
 
 ---
 

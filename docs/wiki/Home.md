@@ -12,7 +12,7 @@ Welcome to the ReliAPI Wiki — your guide to building reliable HTTP and LLM API
 
 ## Getting Started
 
-ReliAPI is a small reliability layer for **any HTTP API** — REST services, internal microservices, and LLM calls.
+ReliAPI is a small reliability layer for **ANY HTTP API and ANY LLM API** — REST services, internal microservices, payment gateways, SaaS APIs, and LLM providers.
 
 **Quick start:**
 

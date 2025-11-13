@@ -1,8 +1,8 @@
 # ReliAPI
 
-**ReliAPI is a small reliability layer for *any* HTTP API — REST services, internal microservices, and LLM calls.**
+**ReliAPI is a small reliability layer for ANY HTTP API and ANY LLM API.**
 
-**Retries, circuit breaker, cache, idempotency, and predictable cost controls for LLM workloads.**
+**Retries, circuit breaker, cache, idempotency, and predictable cost controls.**
 
 **Self-hosted gateway focused on stability and simplicity, not feature bloat.**
 
@@ -10,21 +10,21 @@
 
 ## What is ReliAPI?
 
-ReliAPI is a minimal, self-hostable API gateway that adds reliability layers to HTTP and LLM API calls.
+**Most APIs fail sometimes. ReliAPI keeps them stable.**
 
-**ReliAPI is not limited to LLM calls.**
+ReliAPI is a small reliability layer for **ANY HTTP API and ANY LLM API**. It sits between your application and any external API — whether it's a payment service, SaaS API, internal microservice, or LLM provider.
 
-It can sit in front of *any* HTTP-based API — payment services, SaaS APIs, internal microservices — and apply the same retry, circuit breaker, cache, idempotency, and error handling policies in a uniform way.
+**When APIs glitch, apps break. ReliAPI absorbs failure so you don't have to.**
 
-It provides:
+### What developers get
 
-- **Retries** with exponential backoff
-- **Circuit breaker** per target
-- **TTL cache** for GET/HEAD and LLM requests
-- **Idempotency** with request coalescing
-- **Budget caps** for predictable LLM costs
-- **Unified error format** (no raw stacktraces)
-- **Prometheus metrics** for observability
+- **Retries** — Automatic retries with exponential backoff
+- **Circuit breaker** — Per-target failure detection
+- **Cache** — TTL cache for GET/HEAD and LLM requests
+- **Idempotency** — Request coalescing for duplicate requests
+- **Budget caps** — Predictable cost controls for LLM workloads
+- **Unified errors** — Normalized error format (no raw stacktraces)
+- **Metrics** — Prometheus metrics for observability
 
 ReliAPI is designed to be **simple, predictable, and stable** — not a feature-rich platform.
 
