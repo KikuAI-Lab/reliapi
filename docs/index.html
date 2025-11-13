@@ -657,32 +657,131 @@
             h2 { font-size: 2.2rem; }
             body { font-size: 16px; }
             
+            .hero {
+                padding-bottom: 100px;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+                padding: 0 20px;
+            }
+
+            .scroll-indicator {
+                bottom: 40px;
+                width: 35px;
+                height: 35px;
+            }
+
+            .scroll-indicator::before {
+                font-size: 1.8rem;
+            }
+            
             .stability-engine {
                 flex-direction: column;
                 gap: 40px;
+                padding: 40px 20px;
+            }
+
+            .reliapi-engine {
+                width: 120px;
+                height: 200px;
+            }
+
+            .chaos-grid, .stability-grid {
+                max-width: 180px;
+            }
+
+            .chaos-square, .stability-rect {
+                width: 45px;
+                height: 45px;
             }
 
             .flow-arrow {
                 transform: rotate(90deg);
                 margin: 20px 0;
+                font-size: 2.5rem;
             }
 
             .reliability-toggles {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .toggle-button {
+                padding: 24px;
+                font-size: 1rem;
+            }
+
+            .animation-display {
+                padding: 30px 20px;
+                min-height: 300px;
             }
 
             .charts-container {
                 grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .chart-card {
+                padding: 30px 20px;
+            }
+
+            .chart-visual {
+                height: 250px;
             }
 
             .benefits-grid {
                 grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .benefit-card {
+                padding: 30px 24px;
             }
 
             .table-row {
-                grid-template-columns: 150px repeat(4, 1fr);
-                font-size: 0.9rem;
-                padding: 16px;
+                grid-template-columns: 120px repeat(4, 1fr);
+                font-size: 0.85rem;
+                padding: 16px 12px;
+            }
+
+            .cta-button {
+                padding: 14px 28px;
+                font-size: 1.1rem;
+            }
+
+            section {
+                padding: 60px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.8rem; }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .scroll-indicator {
+                bottom: 30px;
+                width: 30px;
+                height: 30px;
+            }
+
+            .scroll-indicator::before {
+                font-size: 1.5rem;
+            }
+
+            .table-row {
+                grid-template-columns: 100px repeat(4, 1fr);
+                font-size: 0.75rem;
+                padding: 12px 8px;
+            }
+
+            .status-marker {
+                width: 10px;
+                height: 10px;
             }
         }
     </style>
