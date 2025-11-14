@@ -16,17 +16,21 @@
 
 ## What is ReliAPI?
 
-ReliAPI is a **minimal, self-hosted reliability layer** that sits between your application and external APIs. It adds retries, circuit breakers, caching, idempotency, and budget caps to **any HTTP API** and **any LLM provider**.
+ReliAPI is a minimal, self-hosted reliability layer that adds retries, circuit breakers, caching, idempotency, and budget caps to any HTTP API and any LLM provider.
 
-**One Docker container. One config file. One unified API.**
+- **First-class idempotency** — duplicate requests execute once via request coalescing
+- **Predictable costs** — soft/hard budget caps prevent surprise bills
+- **Works with any API** — universal proxy for REST services, payment gateways, SaaS APIs, and LLM providers
 
-### Why ReliAPI?
+One Docker container, one config file, one unified API. All reliability features work consistently across HTTP and LLM targets, with comprehensive observability through Prometheus metrics and structured JSON logging.
 
-- ✅ **Works with any API** — REST services, payment gateways, SaaS APIs, and LLM providers
-- ✅ **Idempotent by design** — duplicate requests execute once, preventing duplicate charges
-- ✅ **Predictable costs** — soft/hard budget caps prevent surprise bills
-- ✅ **Self-hosted** — full control over your data and infrastructure
-- ✅ **Minimal** — no feature bloat, just reliability essentials
+---
+
+## Why ReliAPI is Different
+
+- **True idempotency** — request coalescing prevents duplicate execution and charges
+- **Predictable cost policies** — soft caps (throttle) and hard caps (reject) for LLM costs
+- **Universal proxy** — works for both HTTP APIs and LLM providers with the same reliability features
 
 ---
 
@@ -34,14 +38,13 @@ ReliAPI is a **minimal, self-hosted reliability layer** that sits between your a
 
 | Feature | Description |
 |---------|-------------|
-| 🔄 **Retries** | Exponential backoff with jitter for transient failures |
-| ⚡ **Circuit Breaker** | Automatic failure detection and recovery |
+| 🔄 **Retries** | Exponential backoff with jitter |
+| ⚡ **Circuit Breaker** | Automatic failure detection |
 | 💾 **Cache** | TTL-based caching for GET/HEAD and LLM responses |
 | 🔑 **Idempotency** | Request coalescing prevents duplicate execution |
 | 💰 **Budget Caps** | Soft (throttle) and hard (reject) cost limits |
 | 📡 **Streaming** | Server-Sent Events (SSE) for LLM responses (OpenAI) |
 | 📊 **Observability** | Prometheus metrics and structured JSON logging |
-| 🏢 **Multi-Tenant** | Isolated configs, budgets, and metrics per tenant |
 
 ---
 
@@ -239,7 +242,9 @@ JSON logs with `request_id` for tracing:
 
 ---
 
-## Multi-Tenant Mode
+## Enterprise Features (Optional)
+
+### Multi-Tenant Mode
 
 Isolate clients with separate configs, budgets, and metrics:
 
@@ -256,18 +261,7 @@ tenants:
     rate_limit_rpm: 1000
 ```
 
-Each tenant has isolated cache, idempotency, and metrics.
-
----
-
-## Documentation
-
-- 📖 [Full Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)
-- 🏗️ [Architecture](https://github.com/KikuAI-Lab/reliapi/wiki/Architecture)
-- 📚 [Usage Guides](https://github.com/KikuAI-Lab/reliapi/wiki/Usage-Guides)
-- 🚀 [Deployment Guide](https://github.com/KikuAI-Lab/reliapi/wiki/Deploy-Guide)
-- 👥 [Multi-Tenant Mode](https://github.com/KikuAI-Lab/reliapi/wiki/Multi-Tenant-Mode)
-- 🧪 [Developer Guide](https://github.com/KikuAI-Lab/reliapi/wiki/Developer-Guide)
+Each tenant has isolated cache, idempotency, and metrics. Multi-tenant support is optional and modular.
 
 ---
 
@@ -327,7 +321,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - 🌐 [Live Demo](https://kikuai.dev/products/reliapi)
 - 📚 [Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)
 - 🐛 [Issue Tracker](https://github.com/KikuAI-Lab/reliapi/issues)
-- 💬 [Discussions](https://github.com/KikuAI-Lab/reliapi/discussions)
 
 ---
 
