@@ -8,8 +8,12 @@ Welcome to the ReliAPI Wiki — your guide to building reliable HTTP and LLM API
 - [Architecture](Architecture) — How ReliAPI works internally
 - [Configuration](Configuration) — Configuring targets and policies
 - [Reliability Features](Reliability-Features) — Detailed feature explanations
+- [Usage Guides](Usage-Guides) — HTTP, LLM, Streaming, Idempotency, Budgets, Fallback
+- [Multi-Tenant Mode](Multi-Tenant-Mode) — Multi-tenant isolation and configuration
+- [Deploy Guide](Deploy-Guide) — Production deployment on Hetzner
+- [Performance & Load Testing](Performance-Load-Testing) — k6 testing and benchmarks
+- [Developer Guide](Developer-Guide) — Contributing to ReliAPI
 - [Comparison](Comparison) — Comparison with other tools
-- [FAQ](FAQ) — Frequently asked questions
 
 ## Getting Started
 
