@@ -25,7 +25,7 @@ ReliAPI sits between your application and external APIs, adding reliability feat
 
 ## Why ReliAPI?
 
-- 🔑 **First-class idempotency** — duplicate requests execute once via request coalescing (prevents duplicate charges)
+- 🔑 **First-class idempotency** — request coalescing prevents duplicate charges
 - 💸 **Predictable costs** — soft/hard budget caps prevent surprise LLM bills
 - 🚀 **Universal proxy** — same reliability features for HTTP and LLM APIs
 - 📦 **Minimal & self-hosted** — no SaaS lock-in, full control over your data
@@ -124,7 +124,7 @@ print(result["data"]["content"])  # LLM response
 print(result["meta"]["cost_usd"])  # Estimated cost
 ```
 
-[**More examples →**](https://github.com/KikuAI-Lab/reliapi/wiki/Usage-Guides)
+**[More examples →](https://github.com/KikuAI-Lab/reliapi/wiki/Usage-Guides)**
 
 ---
 
@@ -179,9 +179,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Links
 
-- 🌐 [Live Demo](https://kikuai.dev/products/reliapi)
-- 📚 [Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)
-- 🐛 [Issue Tracker](https://github.com/KikuAI-Lab/reliapi/issues)
+👉 [Live Demo](https://kikuai.dev/products/reliapi)  
+👉 [Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)  
+👉 [Issue Tracker](https://github.com/KikuAI-Lab/reliapi/issues)
 
 ---
 
