@@ -258,10 +258,17 @@ targets:
 
 ### Behavior
 
-- **HTTP Targets**: Fallback to backup HTTP APIs
-- **LLM Targets**: Fallback to backup LLM providers
-- **Sequential**: Tries fallbacks in order
+- **LLM Targets Only**: Currently implemented for LLM proxy only
+- **Error Classes**: Only retryable errors trigger fallback (5xx, 429, network errors)
+- **Sequential**: Fallback targets tried in order (not parallel)
+- **No Queues**: Simple synchronous fallback chain, no background workers
 - **Metadata**: Includes `fallback_used` and `fallback_target` in meta
+
+### Limitations
+
+- **HTTP Proxy**: Fallback not yet implemented for HTTP proxy (planned)
+- **No Parallel**: Fallback targets are tried sequentially, not in parallel
+- **No Smart Routing**: Simple chain, no intelligent provider selection
 
 ---
 

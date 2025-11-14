@@ -126,8 +126,8 @@
             bottom: 60px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -137,7 +137,7 @@
 
         .scroll-indicator::before {
             content: '↓';
-            font-size: 2rem;
+            font-size: 3rem;
             color: var(--accent);
             text-shadow: 0 0 15px rgba(168, 156, 196, 0.8), 0 0 30px rgba(168, 156, 196, 0.5);
             animation: bounce-arrow 2s ease-in-out infinite;
@@ -807,7 +807,7 @@
             }
 
             .scroll-indicator::before {
-                font-size: 1.8rem;
+                font-size: 2.5rem;
             }
             
             .stability-engine {
@@ -899,12 +899,12 @@
 
             .scroll-indicator {
                 bottom: 30px;
-                width: 30px;
-                height: 30px;
+                width: 40px;
+                height: 40px;
             }
 
             .scroll-indicator::before {
-                font-size: 1.5rem;
+                font-size: 2rem;
             }
 
             .table-row {
@@ -926,14 +926,6 @@
         <div class="container">
             <h1>ReliAPI</h1>
             <p>Stability layer for any API — HTTP or LLM.</p>
-            <div class="hero-actions">
-                <a href="https://rapidapi.com/placeholder" class="action-button" target="_blank" rel="noopener noreferrer">
-                    Use on RapidAPI
-                </a>
-                <a href="https://kikuai.dev/api/reliapi" class="action-button" target="_blank" rel="noopener noreferrer">
-                    Official API Endpoint
-                </a>
-        </div>
         </div>
         <div class="scroll-indicator" onclick="document.getElementById('scene-1').scrollIntoView({behavior: 'smooth'})" aria-label="Scroll to next section"></div>
     </section>
@@ -1007,34 +999,8 @@
                 </div>
             <div class="animation-display" id="animation-display">
                 <div class="animation-content">
-                    <p style="color: var(--secondary); text-align: center; font-size: 1.1rem;">
-                        Toggle a reliability test above to see ReliAPI in action
-                    </p>
                             </div>
                             </div>
-            <div style="text-align: center;">
-                <button class="toggle-details" onclick="toggleResponseEnvelope()">
-                    Show technical response envelope
-                </button>
-                            </div>
-            <div class="response-envelope" id="response-envelope">
-                <pre>{
-  "success": true,
-  "data": {
-    "content": "Stable response despite upstream issues"
-  },
-  "meta": {
-    "target": "example_api",
-    "cache_hit": false,
-    "idempotent_hit": false,
-    "retries": 2,
-    "duration_ms": 450,
-    "fallback_used": true,
-    "fallback_target": "backup_api"
-  }
-}</pre>
-            </div>
-            <p class="demo-disclaimer">This demo is fully synthetic and runs in the browser. No real API calls are made.</p>
         </div>
     </section>
 
@@ -1191,6 +1157,20 @@ console.log(await resp.json());</code></pre>
         </div>
     </section>
 
+    <!-- Action Buttons before Footer -->
+    <section style="padding: 60px 0; background: var(--bg);">
+        <div class="container">
+            <div class="hero-actions">
+                <a href="https://rapidapi.com/placeholder" class="action-button" target="_blank" rel="noopener noreferrer">
+                    Use on RapidAPI
+                </a>
+                <a href="https://kikuai.dev/api/reliapi" class="action-button" target="_blank" rel="noopener noreferrer">
+                    Official API Endpoint
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -1206,6 +1186,24 @@ console.log(await resp.json());</code></pre>
     <script>
         let activeToggle = null;
         let chaosIntensity = 0;
+
+        // Auto-activate "Provider Errors" on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const errorsButton = Array.from(document.querySelectorAll('.toggle-button')).find(
+                btn => btn.textContent.trim() === 'Provider Errors'
+            );
+            if (errorsButton) {
+                // Simulate click to activate
+                const engine = document.getElementById('reliapi-engine');
+                const display = document.getElementById('animation-display');
+                errorsButton.classList.add('active');
+                activeToggle = 'errors';
+                chaosIntensity = 1;
+                engine.classList.add('active');
+                increaseChaos();
+                showAnimation('errors', display);
+            }
+        });
 
         function toggleReliability(type) {
             const buttons = document.querySelectorAll('.toggle-button');
@@ -1371,18 +1369,6 @@ console.log(await resp.json());</code></pre>
             }
         }
 
-        function toggleResponseEnvelope() {
-            const envelope = document.getElementById('response-envelope');
-            const button = event.target;
-            
-            if (envelope.classList.contains('expanded')) {
-                envelope.classList.remove('expanded');
-                button.textContent = 'Show technical response envelope';
-            } else {
-                envelope.classList.add('expanded');
-                button.textContent = 'Hide technical response envelope';
-            }
-        }
     </script>
 </body>
 </html>

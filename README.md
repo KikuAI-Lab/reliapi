@@ -55,6 +55,8 @@ reliapi --config config.yaml --redis-url redis://localhost:6379/0
 
 ### HTTP Proxy
 
+#### GET Request
+
 ```bash
 curl -X POST http://localhost:8000/proxy/http \
   -H "Content-Type: application/json" \
@@ -63,7 +65,38 @@ curl -X POST http://localhost:8000/proxy/http \
     "target": "my_api",
     "method": "GET",
     "path": "/users/123",
+    "query": {"include": "profile"},
     "idempotency_key": "req-123"
+  }'
+```
+
+#### POST Request
+
+```bash
+curl -X POST http://localhost:8000/proxy/http \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key" \
+  -d '{
+    "target": "payments",
+    "method": "POST",
+    "path": "/charges",
+    "body": {"amount": 1000, "currency": "usd"},
+    "idempotency_key": "charge-123"
+  }'
+```
+
+#### PUT Request with Cache
+
+```bash
+curl -X POST http://localhost:8000/proxy/http \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key" \
+  -d '{
+    "target": "my_api",
+    "method": "PUT",
+    "path": "/users/123",
+    "body": {"name": "John"},
+    "cache": 300
   }'
 ```
 
@@ -148,7 +181,7 @@ targets:
 
 - **Retries**: Configurable retry matrix per error class (429, 5xx, network)
 - **Circuit Breaker**: Per-target failure threshold and cooldown
-- **Fallback Chains**: Automatic failover to backup targets
+- **Fallback Chains**: Simple sequential fallback for LLM proxy (HTTP proxy fallback planned)
 - **Works for all HTTP APIs**, not just LLM providers
 
 ### Predictability

@@ -10,7 +10,7 @@ Comparison of ReliAPI with other reliability and LLM gateway tools.
 |---------|---------|---------|---------|----------|
 | **Self-hosted** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No (SaaS) |
 | **Open Source** | ✅ MIT | ✅ MIT | ✅ MIT | ❌ Proprietary |
-| **HTTP Proxy** | ✅ Universal | ❌ LLM only | ❌ LLM only | ❌ LLM only |
+| **HTTP Proxy** | ✅ Universal | ⚠️ LLM-focused | ❌ LLM only | ❌ LLM only |
 | **LLM Proxy** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Idempotency** | ✅ First-class | ❌ No | ⚠️ Limited | ❌ No |
 | **Budget Caps** | ✅ Hard + Soft | ⚠️ Basic | ✅ Yes | ✅ Yes |
@@ -36,8 +36,8 @@ Comparison of ReliAPI with other reliability and LLM gateway tools.
 
 ### Where ReliAPI is Different
 
-- **HTTP Support**: ReliAPI supports any HTTP API, not just LLMs
-- **Idempotency**: ReliAPI has first-class idempotency with coalescing
+- **HTTP Support**: ReliAPI supports any HTTP API (payments, SaaS APIs, microservices), not just LLMs. LiteLLM focuses primarily on LLM providers.
+- **Idempotency**: ReliAPI has first-class idempotency with coalescing for both HTTP and LLM requests
 - **Minimal**: ReliAPI is much smaller (~2K LOC vs large codebase)
 - **Budget Control**: ReliAPI has hard/soft caps with throttling
 
