@@ -1,52 +1,66 @@
 # ReliAPI
 
-**ReliAPI is a small reliability layer for ANY HTTP API and ANY LLM API.**
+ReliAPI is a self-hosted reliability layer for HTTP and LLM APIs — adding retries, circuit breaker, cache, idempotency, and budget caps to any upstream API.
 
-**Retries, circuit breaker, cache, idempotency, and predictable cost controls.**
+**Key benefits:**
+- Works with **any HTTP** and **any LLM provider** — universal proxy for REST APIs, payment gateways, SaaS services, and LLM providers
+- **Idempotent by design** via request coalescing — duplicate requests execute once, preventing duplicate charges and ensuring consistency
+- **Predictable AI costs** via soft/hard budget caps — no surprise bills, automatic token throttling when soft caps are exceeded
 
-**Self-hosted gateway focused on stability and simplicity, not feature bloat.**
+ReliAPI provides a minimal, self-hostable gateway that sits between your application and external APIs. Unlike LLM-only gateways, ReliAPI handles both HTTP and LLM requests uniformly. Unlike feature-heavy SaaS platforms, ReliAPI stays minimal and fully self-hosted. One Docker container, one config file, one unified API — that's it. All reliability features (retries, circuit breaker, cache, idempotency, budget control) work consistently across HTTP and LLM targets, with comprehensive observability through Prometheus metrics and structured JSON logging.
 
 ---
 
-## What is ReliAPI?
+## Key Features
 
-**Most APIs fail sometimes. ReliAPI keeps them stable.**
-
-ReliAPI is a small reliability layer for **ANY HTTP API and ANY LLM API**. It sits between your application and any external API — whether it's a payment service, SaaS API, internal microservice, or LLM provider.
-
-**When APIs glitch, apps break. ReliAPI absorbs failure so you don't have to.**
-
-### What developers get
-
-- **Retries** — Automatic retries with exponential backoff
-- **Circuit breaker** — Per-target failure detection
-- **Cache** — TTL cache for GET/HEAD and LLM requests
-- **Idempotency** — Request coalescing for duplicate requests
-- **Budget caps** — Predictable cost controls for LLM workloads
-- **Unified errors** — Normalized error format (no raw stacktraces)
-- **Metrics** — Prometheus metrics for observability
-
-ReliAPI is designed to be **simple, predictable, and stable** — not a feature-rich platform.
+- ✅ **Retries** with exponential backoff and jitter
+- ✅ **Circuit breakers** for automatic failure detection
+- ✅ **Caching** for GET/HEAD requests and LLM responses
+- ✅ **First-class idempotency** with request coalescing
+- ✅ **Predictable budget caps** (soft/hard cost limits)
+- ✅ **Streaming** — Server-Sent Events (SSE) streaming for LLM responses (OpenAI)
+- ✅ **Unified metrics** (Prometheus)
 
 ---
 
 ## Quick Start
 
-### Docker (Recommended)
+### Installation
 
 ```bash
-docker run -d \
-  -p 8000:8000 \
-  -e REDIS_URL=redis://localhost:6379/0 \
-  -v $(pwd)/config.yaml:/app/config.yaml \
-  reliapi/reliapi:latest
+pip install -r requirements.txt
 ```
 
-### Python
+### Configuration
+
+Create `config.yaml`:
+
+```yaml
+targets:
+  openai:
+    base_url: "https://api.openai.com/v1"
+    timeout_ms: 20000
+    circuit:
+      error_threshold: 5
+      cooldown_s: 60
+    llm:
+      provider: "openai"
+      default_model: "gpt-4o-mini"
+      max_tokens: 1024
+      soft_cost_cap_usd: 0.01
+      hard_cost_cap_usd: 0.05
+    cache:
+      ttl_s: 3600
+      enabled: true
+    auth:
+      type: bearer_env
+      env_var: OPENAI_API_KEY
+```
+
+### Run
 
 ```bash
-pip install reliapi
-reliapi --config config.yaml --redis-url redis://localhost:6379/0
+RELIAPI_CONFIG=config.yaml REDIS_URL=redis://localhost:6379/0 python -m uvicorn reliapi.app.main:app --host 0.0.0.0 --port 8000
 ```
 
 ---
@@ -102,6 +116,8 @@ curl -X POST http://localhost:8000/proxy/http \
 
 ### LLM Proxy
 
+#### Non-Streaming
+
 ```bash
 curl -X POST http://localhost:8000/proxy/llm \
   -H "Content-Type: application/json" \
@@ -112,6 +128,21 @@ curl -X POST http://localhost:8000/proxy/llm \
     "idempotency_key": "chat-123"
   }'
 ```
+
+#### Streaming (Server-Sent Events)
+
+```bash
+curl -X POST http://localhost:8000/proxy/llm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target": "openai",
+    "messages": [{"role": "user", "content": "Count from 1 to 3"}],
+    "model": "gpt-4o-mini",
+    "stream": true
+  }'
+```
+
+**Response:** Server-Sent Events (SSE) stream with `event: meta`, `event: chunk`, and `event: done` events.
 
 ### Idempotency
 
@@ -216,6 +247,7 @@ See [COMPARISON.md](docs/COMPARISON.md) for detailed comparison with LiteLLM, Po
 | Idempotency | ✅ First-class | ❌ | ⚠️ Limited | ❌ |
 | Budget Caps | ✅ | ⚠️ Basic | ✅ | ✅ |
 | HTTP Proxy | ✅ | ❌ | ❌ | ❌ |
+| Streaming | ✅ SSE (OpenAI) | ✅ | ✅ | ✅ |
 | Minimal | ✅ | ❌ | ❌ | ❌ |
 
 ---
@@ -256,4 +288,3 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guideli
 ---
 
 **ReliAPI** — Reliability layer for HTTP and LLM calls. Simple, predictable, stable.
-

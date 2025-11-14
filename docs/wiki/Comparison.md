@@ -18,7 +18,7 @@ Comparison of ReliAPI with other reliability and LLM gateway tools.
 | **Retries** | ✅ Configurable | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Circuit Breaker** | ✅ Per-target | ⚠️ Basic | ✅ Yes | ✅ Yes |
 | **Fallback Chains** | ✅ Config-driven | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Streaming** | ❌ Not yet | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Streaming** | ✅ SSE (OpenAI) | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Observability** | ✅ Prometheus | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Minimal** | ✅ ~2K LOC | ❌ Large | ❌ Large | ❌ Large |
 | **Docker Ready** | ✅ Yes | ✅ Yes | ✅ Yes | N/A |
@@ -133,8 +133,8 @@ Comparison of ReliAPI with other reliability and LLM gateway tools.
 
 ### ReliAPI's Limitations
 
-1. **No Streaming**: Streaming not supported yet (planned)
-2. **No Dashboards**: Prometheus metrics only, no built-in dashboards
+1. **Limited Streaming**: Streaming supported for OpenAI only (Anthropic/Mistral in plans)
+2. **No Dashboards**: Prometheus metrics only, no built-in dashboards (Grafana dashboards available)
 3. **No Multi-Tenant**: Single-tenant only
 4. **Limited Providers**: Supports OpenAI, Anthropic, Mistral (expandable)
 
@@ -164,7 +164,7 @@ Comparison of ReliAPI with other reliability and LLM gateway tools.
 | **Idempotent LLM calls** | ✅ | ❌ | ⚠️ | ❌ |
 | **Predictable costs** | ✅ | ⚠️ | ✅ | ✅ |
 | **Minimal overhead** | ✅ | ⚠️ | ⚠️ | ⚠️ |
-| **Streaming support** | ❌ | ✅ | ✅ | ✅ |
+| **Streaming support** | ✅ OpenAI | ✅ | ✅ | ✅ |
 | **Observability dashboards** | ❌ | ⚠️ | ✅ | ✅ |
 | **Multi-tenant** | ❌ | ⚠️ | ✅ | ✅ |
 
@@ -182,7 +182,7 @@ ReliAPI is best for teams that need:
 
 Choose alternatives if you need:
 
-- **Streaming support** (LiteLLM, Portkey)
+- **Streaming for all providers** (LiteLLM, Portkey support more providers)
 - **Advanced dashboards** (Portkey, Helicone)
 - **Multi-tenant features** (Portkey)
 - **SaaS observability** (Helicone)

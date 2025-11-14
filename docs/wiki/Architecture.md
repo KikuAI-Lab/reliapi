@@ -108,7 +108,7 @@ For LLM API requests (`POST /proxy/llm`):
 
 1. **Request Parsing**: Extract target, messages, model, parameters
 2. **Target Resolution**: Load target config with LLM settings
-3. **Streaming Rejection**: Reject streaming requests (not supported yet)
+3. **Streaming Check**: If `stream: true`, route to streaming handler (SSE)
 4. **Budget Control**: Estimate cost, check hard/soft caps
 5. **Idempotency Check**: Check if request with same `idempotency_key` exists
 6. **Cache Check**: Check cache for LLM response
@@ -195,7 +195,7 @@ For LLM API requests (`POST /proxy/llm`):
 1. Client → POST /proxy/llm
 2. Parse request (target, messages, model, ...)
 3. Load target config (with LLM settings)
-4. Reject streaming (if requested)
+4. Handle streaming (if requested) via Server-Sent Events (SSE)
 5. Estimate cost
 6. Check hard cap (reject if exceeded)
 7. Check soft cap (throttle if exceeded)

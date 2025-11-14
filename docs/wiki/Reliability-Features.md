@@ -272,6 +272,53 @@ targets:
 
 ---
 
+## Streaming (LLM Only)
+
+### How It Works
+
+ReliAPI supports Server-Sent Events (SSE) streaming for LLM responses:
+
+1. **Request**: Set `stream: true` in LLM proxy request
+2. **Response**: Returns SSE stream with `text/event-stream` content type
+3. **Events**: Emits `meta`, `chunk`, `done`, and `error` events
+4. **Budget Caps**: Hard caps checked before stream opens, soft caps applied by reducing `max_tokens`
+
+### Usage
+
+```bash
+curl -X POST http://localhost:8000/proxy/llm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target": "openai",
+    "messages": [{"role": "user", "content": "Count 1-3"}],
+    "model": "gpt-4o-mini",
+    "stream": true
+  }'
+```
+
+### SSE Events
+
+1. **`event: meta`** - Request metadata (request_id, target, model, cost_estimate)
+2. **`event: chunk`** - Text chunks as they arrive (`delta` field)
+3. **`event: done`** - Final completion (finish_reason, usage, cost_usd)
+4. **`event: error`** - Error events (if something goes wrong)
+
+### Behavior
+
+- **OpenAI Only**: Currently supported for OpenAI (Anthropic/Mistral in plans)
+- **Budget Caps**: Hard cap checked before stream opens, rejects if exceeded
+- **Soft Cap**: Applied by reducing `max_tokens` before stream starts
+- **Idempotency**: Streaming requests with same idempotency key return `STREAM_ALREADY_IN_PROGRESS` or `STREAM_ALREADY_COMPLETED`
+- **Cost Tracking**: Final cost calculated and included in `event: done`
+
+### Limitations
+
+- **Provider Support**: Only OpenAI streaming supported (Anthropic/Mistral planned)
+- **Usage Tokens**: OpenAI may not send usage tokens in streaming mode (depends on API version)
+- **No Mid-Stream Fallback**: If stream fails mid-flight, sends error event (no seamless failover)
+
+---
+
 ## Summary
 
 All reliability features work uniformly for HTTP and LLM targets:
@@ -281,6 +328,7 @@ All reliability features work uniformly for HTTP and LLM targets:
 - **Cache**: TTL cache for GET/HEAD and LLM responses
 - **Idempotency**: Request coalescing for duplicate requests
 - **Budget Caps**: Cost control for LLM requests (LLM only)
+- **Streaming**: Server-Sent Events (SSE) streaming for LLM responses (OpenAI)
 - **Error Normalization**: Unified error format
 - **Fallback Chains**: Automatic failover to backup targets
 

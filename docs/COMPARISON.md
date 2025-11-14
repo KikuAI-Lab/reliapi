@@ -18,7 +18,7 @@
 | **Retries** | ✅ Configurable | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Circuit Breaker** | ✅ Per-target | ⚠️ Basic | ✅ Yes | ✅ Yes |
 | **Fallback Chains** | ✅ Config-driven | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Streaming** | ❌ Not yet | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Streaming** | ✅ SSE (OpenAI) | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Observability** | ✅ Prometheus | ✅ Yes | ✅ Yes | ✅ Yes |
 | **Minimal** | ✅ ~2K LOC | ❌ Large | ❌ Large | ❌ Large |
 | **Docker Ready** | ✅ Yes | ✅ Yes | ✅ Yes | N/A |
@@ -37,8 +37,8 @@
 - Self-hostable, no dependencies on external services
 
 **Limitations:**
-- No streaming support yet
-- No built-in dashboards (Prometheus only)
+- Limited streaming support (OpenAI only, Anthropic/Mistral in plans)
+- No built-in dashboards (Prometheus + Grafana dashboards available)
 - No multi-tenant features
 - No prompt management
 
@@ -109,7 +109,7 @@
 | **Idempotent LLM calls** | ✅ | ❌ | ⚠️ | ❌ |
 | **Predictable costs** | ✅ | ⚠️ | ✅ | ✅ |
 | **Minimal overhead** | ✅ | ⚠️ | ⚠️ | ⚠️ |
-| **Streaming support** | ❌ | ✅ | ✅ | ✅ |
+| **Streaming support** | ✅ OpenAI | ✅ | ✅ | ✅ |
 | **Observability dashboards** | ❌ | ⚠️ | ✅ | ✅ |
 | **Multi-tenant** | ❌ | ⚠️ | ✅ | ✅ |
 
@@ -168,7 +168,7 @@ ReliAPI is **minimal, self-hostable, and focused on reliability** — not featur
 - Predictable costs
 - Simple, maintainable codebase
 
-If you need streaming, dashboards, or multi-tenant features, consider alternatives.
+If you need streaming for all providers, advanced dashboards, or multi-tenant features, consider alternatives.
 
 ---
 
