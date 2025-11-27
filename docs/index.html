@@ -189,7 +189,8 @@
     .hidden { display: none; }
     
     @media (max-width: 768px) {
-      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
       .md-flex { flex-direction: column; }
       .md-hidden { display: none; }
       .text-6xl { font-size: 2.5rem; }
@@ -206,9 +207,26 @@
       .mb-12 { margin-bottom: 2rem; }
       .mb-16 { margin-bottom: 3rem; }
       .hero-logo { width: 64px; height: 64px; }
-      .visualization-area { height: 400px !important; min-height: 400px; }
-      .scenario-btn { padding: 1rem !important; }
-      .scenario-icon { width: 40px !important; height: 40px !important; font-size: 1.5rem !important; }
+      .visualization-area { height: 350px !important; min-height: 350px; }
+      .scenario-btn { padding: 0.75rem !important; }
+      .scenario-icon { width: 32px !important; height: 32px !important; font-size: 1.25rem !important; }
+      .scenario-btn .font-semibold { font-size: 0.875rem !important; }
+      .scenario-btn .text-xs { font-size: 0.7rem !important; }
+      .vis-content { padding: 1rem !important; }
+      .vis-content .flex.items-center.gap-8 { gap: 0.5rem !important; }
+      .vis-content > div > div { min-width: auto !important; }
+      .vis-content .flex.flex-col.items-center { min-width: 60px !important; }
+      .vis-content .flex.flex-col.items-center > div { width: 50px !important; height: 50px !important; font-size: 1.25rem !important; }
+      .vis-content .server-card { padding: 0.5rem !important; gap: 0.5rem !important; }
+      .vis-content .server-card svg { width: 24px !important; height: 24px !important; }
+      .vis-content .server-card .font-medium { font-size: 0.75rem !important; }
+      .vis-content .server-card .text-sm { font-size: 0.7rem !important; }
+      .vis-content .funnel-box { width: 60px !important; height: 60px !important; padding: 0.5rem !important; }
+      .vis-content .funnel-box svg { width: 32px !important; height: 32px !important; }
+      .vis-content .funnel-box .text-xs { font-size: 0.65rem !important; }
+      .vis-content .budget-meter { width: 200px !important; }
+      .vis-content .text-2xl { font-size: 1.25rem !important; }
+      .vis-content .text-sm { font-size: 0.75rem !important; }
       .code-block { font-size: 0.75rem !important; padding: 1rem !important; }
       .comparison-table { font-size: 0.875rem; }
       .comparison-table th, .comparison-table td { padding: 0.75rem 0.5rem !important; }
@@ -221,6 +239,7 @@
     }
     
     @media (max-width: 480px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 0.5rem !important; }
       .hero-title { font-size: 2rem !important; }
       .hero-subtitle { font-size: 1rem !important; }
       .text-3xl { font-size: 1.25rem; }
@@ -228,8 +247,28 @@
       .section { padding: 2rem 0; }
       .mb-8 { margin-bottom: 1.5rem; }
       .mb-12 { margin-bottom: 1.5rem; }
-      .visualization-area { height: 350px !important; min-height: 350px; }
-      .scenario-btn { padding: 0.75rem !important; }
+      .visualization-area { height: 300px !important; min-height: 300px; }
+      .scenario-btn { padding: 0.5rem !important; }
+      .scenario-icon { width: 28px !important; height: 28px !important; font-size: 1rem !important; }
+      .scenario-btn .font-semibold { font-size: 0.75rem !important; margin-bottom: 0.25rem !important; }
+      .scenario-btn .text-xs { font-size: 0.65rem !important; }
+      .scenario-btn .flex.items-center.gap-4 { gap: 0.5rem !important; margin-bottom: 0.5rem !important; }
+      .vis-content { padding: 0.75rem !important; }
+      .vis-content .flex.items-center.gap-8 { gap: 0.25rem !important; flex-wrap: wrap; }
+      .vis-content .flex.flex-col.items-center { min-width: 50px !important; }
+      .vis-content .flex.flex-col.items-center > div { width: 40px !important; height: 40px !important; font-size: 1rem !important; }
+      .vis-content .flex.flex-col.items-center .text-xs { font-size: 0.6rem !important; }
+      .vis-content .server-card { padding: 0.4rem !important; gap: 0.4rem !important; }
+      .vis-content .server-card svg { width: 20px !important; height: 20px !important; }
+      .vis-content .server-card .font-medium { font-size: 0.7rem !important; }
+      .vis-content .server-card .text-sm { font-size: 0.65rem !important; }
+      .vis-content .funnel-box { width: 50px !important; height: 50px !important; padding: 0.4rem !important; }
+      .vis-content .funnel-box svg { width: 24px !important; height: 24px !important; }
+      .vis-content .funnel-box .text-xs { font-size: 0.6rem !important; }
+      .vis-content .budget-meter { width: 180px !important; }
+      .vis-content .text-2xl { font-size: 1rem !important; }
+      .vis-content .text-sm { font-size: 0.7rem !important; }
+      .vis-content .flex.flex-col.gap-8 { gap: 0.5rem !important; }
       .code-block { font-size: 0.7rem !important; padding: 0.75rem !important; }
       .comparison-table { font-size: 0.75rem; overflow-x: auto; display: block; }
       .comparison-table th, .comparison-table td { padding: 0.5rem 0.25rem !important; white-space: nowrap; }
