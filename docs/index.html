@@ -1905,7 +1905,7 @@
       python: `import requests
 
 response = requests.post(
-    "https://api.reliapi.com/proxy/llm",
+    "https://reliapi.kikuai.dev/proxy/llm",
     headers={
         "X-API-Key": "YOUR_API_KEY",
         "X-Idempotency-Key": "unique-request-id"
@@ -1918,7 +1918,7 @@ response = requests.post(
 )
 
 print(response.json())`,
-      javascript: `const response = await fetch("https://api.reliapi.com/proxy/llm", {
+      javascript: `const response = await fetch("https://reliapi.kikuai.dev/proxy/llm", {
   method: "POST",
   headers: {
     "X-API-Key": "YOUR_API_KEY",
@@ -1934,7 +1934,7 @@ print(response.json())`,
 
 const data = await response.json();
 console.log(data);`,
-      curl: `curl -X POST https://api.reliapi.com/proxy/llm \\
+      curl: `curl -X POST https://reliapi.kikuai.dev/proxy/llm \\
   -H "X-API-Key: YOUR_API_KEY" \\
   -H "X-Idempotency-Key: unique-request-id" \\
   -H "Content-Type: application/json" \\
