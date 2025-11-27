@@ -122,13 +122,25 @@ https://reliapi.kikuai.dev
 
 ### Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/healthz` | GET | Health check |
-| `/readyz` | GET | Readiness check |
-| `/proxy/llm` | POST | LLM proxy endpoint |
-| `/proxy/http` | POST | HTTP proxy endpoint |
-| `/metrics` | GET | Prometheus metrics |
+**Available Endpoints:**
+- `POST /proxy/llm` - Main LLM proxy endpoint ⭐ (REQUIRED for RapidAPI)
+- `POST /proxy/http` - HTTP proxy endpoint
+- `GET /healthz` - Health check (REQUIRED for RapidAPI monitoring)
+- `GET /readyz` - Readiness check
+- `GET /livez` - Liveness check
+- `GET /metrics` - Prometheus metrics
+- `GET /rapidapi/status` - RapidAPI status endpoint
+
+**⚠️ IMPORTANT:** RapidAPI requires at least 1 endpoint before making API public.
+
+**Quick Fix:**
+1. Go to RapidAPI Dashboard → Endpoints → Add Endpoint
+2. Add `POST /proxy/llm` (main endpoint)
+3. Add `GET /healthz` (for health checks)
+
+**Or import OpenAPI spec:**
+- URL: `https://reliapi.kikuai.dev/openapi.json`
+- See `RAPIDAPI_QUICK_START.md` for detailed instructions
 
 ### Health Check for RapidAPI
 ```
