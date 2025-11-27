@@ -204,7 +204,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - 🌐 **[Live Demo](https://kikuai-lab.github.io/reliapi/)** — Interactive demo and examples
 - 📚 **[Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)** — Complete wiki documentation
 - 🐛 **[Issue Tracker](https://github.com/KikuAI-Lab/reliapi/issues)** — Report bugs or request features
-- 🏢 **[KikuAI Lab](https://github.com/KikuAI-Lab)** — More projects
+- 🏢 **[KikuAI Lab](https://kikuai.dev)** — More projects
 
 ---
 
@@ -212,7 +212,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **ReliAPI** — Reliability layer for HTTP and LLM calls. Simple, predictable, stable.
 
-Made with ❤️ by [KikuAI Lab](https://github.com/KikuAI-Lab)
+Made with ❤️ by [KikuAI Lab](https://kikuai.dev)
 
 </div>
-
