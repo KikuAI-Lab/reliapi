@@ -236,6 +236,7 @@
       .stats-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
       .flex.items-center.gap-8 { gap: 1rem !important; flex-wrap: wrap; }
       .flex.items-center.gap-8 > * { min-width: auto !important; }
+      div[style*="margin-left: 2rem"] { margin-left: 0 !important; }
     }
     
     @media (max-width: 480px) {
@@ -1270,7 +1271,7 @@
         </div>
         
         <!-- Latency Bars -->
-        <div>
+        <div style="margin-left: 2rem;">
           <h3 class="text-xl font-semibold mb-6">P95 Latency (ms)</h3>
           <div class="flex flex-col gap-4">
             <div>
