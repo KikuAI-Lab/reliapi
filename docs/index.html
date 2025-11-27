@@ -1171,7 +1171,7 @@
             <div class="scenario-icon" style="background: rgba(168, 156, 196, 0.2);">⚡</div>
           </div>
           <div class="font-semibold mb-1" style="color: var(--foreground);">Request Storm</div>
-          <div class="text-xs text-muted">Deduplication</div>
+          <div class="text-xs text-muted">Idempotency</div>
         </button>
         
         <button class="scenario-btn" data-scenario="budget-cap">
@@ -1201,7 +1201,8 @@
   <section class="section">
     <div class="container">
       <h2 class="text-3xl font-bold text-center mb-4">Performance That Speaks for Itself</h2>
-      <p class="text-muted text-center mb-16">Hover over metrics to explore the ReliAPI difference</p>
+      <p class="text-muted text-center mb-4">Hover over metrics to explore the ReliAPI difference</p>
+      <p class="text-xs text-center mb-16" style="color: rgba(155, 160, 165, 0.6);">*Benchmarks are synthetic. Actual results depend on environment. <a href="https://github.com/KikuAI-Lab/reliapi/blob/main/docs/BENCHMARKS.md" style="color: var(--primary);">See methodology</a></p>
       
       <div class="grid grid-2 gap-12">
         <!-- Stats Cards -->
@@ -1272,21 +1273,31 @@
         
         <!-- Latency Bars -->
         <div style="margin-left: 2rem;">
-          <h3 class="text-xl font-semibold mb-6">P95 Latency (ms)</h3>
+          <h3 class="text-xl font-semibold mb-6">P95 Proxy Overhead (ms)</h3>
+          <p class="text-xs text-muted mb-4">Additional latency added by proxy layer</p>
           <div class="flex flex-col gap-4">
             <div>
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-muted font-medium">LiteLLM</span>
-                <span class="text-destructive">850ms</span>
+                <span class="text-muted font-medium">Helicone</span>
+                <span class="text-destructive">~40ms</span>
               </div>
               <div class="latency-bar">
-                <div class="latency-fill" id="latency-litellm" style="width: 0%; background: var(--destructive);"></div>
+                <div class="latency-fill" id="latency-helicone" style="width: 0%; background: var(--destructive);"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-2">
+                <span class="text-muted font-medium">LiteLLM</span>
+                <span class="text-yellow">~30ms</span>
+              </div>
+              <div class="latency-bar">
+                <div class="latency-fill" id="latency-litellm" style="width: 0%; background: var(--yellow);"></div>
               </div>
             </div>
             <div>
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-muted font-medium">Portkey</span>
-                <span class="text-yellow">780ms</span>
+                <span class="text-yellow">~25ms</span>
               </div>
               <div class="latency-bar">
                 <div class="latency-fill" id="latency-portkey" style="width: 0%; background: var(--yellow);"></div>
@@ -1294,17 +1305,8 @@
             </div>
             <div>
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-muted font-medium">Helicone</span>
-                <span class="text-yellow">720ms</span>
-              </div>
-              <div class="latency-bar">
-                <div class="latency-fill" id="latency-helicone" style="width: 0%; background: var(--yellow);"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm mb-2">
                 <span class="text-green font-medium">ReliAPI</span>
-                <span class="text-green font-bold">450ms</span>
+                <span class="text-green font-bold">~15ms</span>
               </div>
               <div class="latency-bar">
                 <div class="latency-fill" id="latency-reliapi" style="width: 0%; background: var(--green);"></div>
@@ -1338,8 +1340,8 @@
               <td>Self-hosted Option</td>
               <td><span class="status-icon full">✓</span></td>
               <td><span class="status-icon full">✓</span></td>
-              <td><span class="status-icon partial">~</span></td>
-              <td><span class="status-icon partial">~</span></td>
+              <td><span class="status-icon full">✓</span></td>
+              <td><span class="status-icon none">✗</span></td>
             </tr>
             <tr>
               <td>HTTP + LLM Support</td>
@@ -1880,16 +1882,16 @@
           document.getElementById('stat-cache-reli').style.width = '68%';
           
           setTimeout(() => {
-            document.getElementById('latency-litellm').style.width = '85%';
+            document.getElementById('latency-helicone').style.width = '100%';
           }, 500);
           setTimeout(() => {
-            document.getElementById('latency-portkey').style.width = '78%';
+            document.getElementById('latency-litellm').style.width = '75%';
           }, 650);
           setTimeout(() => {
-            document.getElementById('latency-helicone').style.width = '72%';
+            document.getElementById('latency-portkey').style.width = '62%';
           }, 800);
           setTimeout(() => {
-            document.getElementById('latency-reliapi').style.width = '45%';
+            document.getElementById('latency-reliapi').style.width = '37%';
           }, 950);
         }
       });
@@ -1903,43 +1905,43 @@
       python: `import requests
 
 response = requests.post(
-    "https://api.reliapi.com/v1/chat/completions",
+    "https://api.reliapi.com/proxy/llm",
     headers={
-        "Authorization": "Bearer YOUR_API_KEY",
+        "X-API-Key": "YOUR_API_KEY",
         "X-Idempotency-Key": "unique-request-id"
     },
     json={
+        "target": "openai",
         "model": "gpt-4",
-        "messages": [{"role": "user", "content": "Hello!"}],
-        "fallback_models": ["claude-3-sonnet", "gemini-pro"]
+        "messages": [{"role": "user", "content": "Hello!"}]
     }
 )
 
 print(response.json())`,
-      javascript: `const response = await fetch("https://api.reliapi.com/v1/chat/completions", {
+      javascript: `const response = await fetch("https://api.reliapi.com/proxy/llm", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "X-API-Key": "YOUR_API_KEY",
     "X-Idempotency-Key": "unique-request-id",
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
+    target: "openai",
     model: "gpt-4",
-    messages: [{ role: "user", content: "Hello!" }],
-    fallback_models: ["claude-3-sonnet", "gemini-pro"]
+    messages: [{ role: "user", content: "Hello!" }]
   })
 });
 
 const data = await response.json();
 console.log(data);`,
-      curl: `curl -X POST https://api.reliapi.com/v1/chat/completions \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+      curl: `curl -X POST https://api.reliapi.com/proxy/llm \\
+  -H "X-API-Key: YOUR_API_KEY" \\
   -H "X-Idempotency-Key: unique-request-id" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "target": "openai",
     "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Hello!"}],
-    "fallback_models": ["claude-3-sonnet", "gemini-pro"]
+    "messages": [{"role": "user", "content": "Hello!"}]
   }'`
     };
     
