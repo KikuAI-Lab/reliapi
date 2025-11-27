@@ -4,8 +4,10 @@
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| **Domain** | `reliapi.kikuai.dev` | Currently points to Cloudflare (172.67.173.122) |
-| **Hetzner Server** | ❌ OFFLINE | IP: 91.98.122.162 - Not responding |
+| **Domain** | `reliapi.kikuai.dev` | Should point to 37.27.38.186 |
+| **Server** | ✅ ONLINE | IP: 37.27.38.186 (kiku-server) |
+| **API** | ✅ Running | Docker container `reliapi-app` on port 8000 |
+| **SSL** | ✅ Configured | Let's Encrypt certificate valid until 2026-02-25 |
 | **Demo** | ✅ Updated | Uses `https://reliapi.kikuai.dev` |
 | **Documentation** | ✅ Updated | All links point to new domain |
 
@@ -196,14 +198,24 @@ After deployment, verify:
 
 ---
 
-## Server Information (from last deployment)
+## Server Information
 
 ```
-SERVER_ID=113111433
-SERVER_IP=91.98.122.162
-SERVER_NAME=reliapi-prod-1763115192
-RELIAPI_API_KEY=Lnuii8yPq8WBzoJJGpWmXBlaoJ4NqDTkZJ0QNyDyrlI
+SERVER_NAME=kiku-server
+SERVER_IP=37.27.38.186
+DOMAIN=reliapi.kikuai.dev
+SSL_EXPIRES=2026-02-25
 ```
 
-**Note:** If creating new server, update this information.
+### Docker Containers
+- `reliapi-app` - Main API (port 8000)
+- `reliapi-redis` - Redis cache
+- `reliapi-prometheus` - Metrics (port 9090)
+- `reliapi-grafana` - Dashboards (port 3000)
+- `nginx` - Reverse proxy (ports 80, 443)
+
+### Direct Test (bypass DNS)
+```bash
+curl -sk -H "Host: reliapi.kikuai.dev" https://37.27.38.186/healthz
+```
 
