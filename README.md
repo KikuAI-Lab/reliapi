@@ -201,6 +201,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Links
 
+- ⚡ **[Try on RapidAPI](https://rapidapi.com/kikuai-lab-kikuai-lab-default/api/reliapi)** — Start using ReliAPI in minutes
 - 🌐 **[Live Demo](https://kikuai-lab.github.io/reliapi/)** — Interactive demo and examples
 - 📚 **[Documentation](https://github.com/KikuAI-Lab/reliapi/wiki)** — Complete wiki documentation
 - 🐛 **[Issue Tracker](https://github.com/KikuAI-Lab/reliapi/issues)** — Report bugs or request features
