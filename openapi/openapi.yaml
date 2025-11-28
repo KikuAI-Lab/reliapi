@@ -1,0 +1,309 @@
+openapi: 3.1.0
+info:
+  title: ReliAPI
+  description: 'Reliability layer for API calls: retries, caching, dedup, circuit
+    breakers.'
+  version: 1.0.1
+  contact:
+    name: KikuAI-Lab
+    url: https://github.com/kikuai-lab/reliapi
+    email: dev@kikuai.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+paths:
+  /healthz:
+    get:
+      summary: Healthz
+      description: Health check endpoint with optional rate limiting.
+      operationId: healthz_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /readyz:
+    get:
+      summary: Readyz
+      description: Readiness check endpoint with optional rate limiting.
+      operationId: readyz_readyz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /livez:
+    get:
+      summary: Livez
+      description: Liveness check endpoint with optional rate limiting.
+      operationId: livez_livez_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /metrics:
+    get:
+      summary: Metrics
+      description: Prometheus metrics endpoint with rate limiting.
+      operationId: metrics_metrics_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /proxy/http:
+    post:
+      summary: Proxy HTTP request
+      description: Universal HTTP proxy endpoint for any HTTP API. Supports retries,
+        circuit breaker, cache, and idempotency. Use this endpoint to add reliability
+        layers to any HTTP API call.
+      operationId: proxy_http_proxy_http_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HTTPProxyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /proxy/llm:
+    post:
+      summary: Proxy LLM request
+      description: LLM proxy endpoint with idempotency, budget caps, and caching.
+        Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic,
+        and Mistral providers. Set stream=true for Server-Sent Events (SSE) streaming.
+      operationId: proxy_llm_proxy_llm_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMProxyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /rapidapi/status:
+    get:
+      summary: RapidAPI Integration Status
+      description: Check the status of RapidAPI integration.
+      operationId: rapidapi_status_rapidapi_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    HTTPProxyRequest:
+      properties:
+        target:
+          type: string
+          title: Target
+          description: Target name from config.yaml (e.g., 'my_api')
+        method:
+          type: string
+          title: Method
+          description: 'HTTP method: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS'
+        path:
+          type: string
+          title: Path
+          description: API path (e.g., '/users/123' or '/api/v1/data')
+        headers:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Headers
+          description: HTTP headers to include in request
+        query:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Query
+          description: 'Query parameters (e.g., {''page'': 1, ''limit'': 10})'
+        body:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Body
+          description: Request body as JSON string (for POST/PUT/PATCH)
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for request coalescing. Concurrent requests
+            with same key execute once.
+        cache:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cache
+          description: Cache TTL in seconds (overrides config default). Only applies
+            to GET/HEAD requests.
+      type: object
+      required:
+      - target
+      - method
+      - path
+      title: HTTPProxyRequest
+      description: 'Request schema for POST /proxy/http.
+
+
+        Use this endpoint to proxy any HTTP API request with reliability layers:
+
+        - Retries with exponential backoff
+
+        - Circuit breaker per target
+
+        - TTL cache for GET/HEAD requests
+
+        - Idempotency with request coalescing'
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LLMProxyRequest:
+      properties:
+        target:
+          type: string
+          title: Target
+          description: LLM target name from config.yaml (e.g., 'openai', 'anthropic')
+        messages:
+          items:
+            additionalProperties:
+              type: string
+            type: object
+          type: array
+          title: Messages
+          description: 'Messages list with ''role'' and ''content'' (e.g., [{''role'':
+            ''user'', ''content'': ''Hello''}])'
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+          description: Model name (e.g., 'gpt-4o-mini', 'claude-3-haiku'). Uses default
+            from config if not specified.
+        max_tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens in response (limited by config max_tokens and
+            budget caps)
+        temperature:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Temperature
+          description: Temperature for sampling (0.0-2.0, limited by config)
+        top_p:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Top P
+          description: Top-p sampling parameter (0.0-1.0)
+        stop:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Stop
+          description: Stop sequences (e.g., ['\n', 'END'])
+        stream:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Stream
+          description: Streaming mode. If true, returns Server-Sent Events (SSE) stream.
+            If false or omitted, returns standard JSON response.
+          default: false
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for request coalescing. Use same key for duplicate
+            requests to avoid duplicate LLM calls.
+        cache:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cache
+          description: Cache TTL in seconds (overrides config default). Cached responses
+            return instantly without LLM call.
+      type: object
+      required:
+      - target
+      - messages
+      title: LLMProxyRequest
+      description: 'Request schema for POST /proxy/llm.
+
+
+        Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic,
+        and Mistral.
+
+        Features:
+
+        - Idempotency: duplicate requests return cached result
+
+        - Budget caps: hard cap (reject) and soft cap (throttle)
+
+        - Caching: TTL cache for LLM responses
+
+        - Retries: automatic retries on failures'
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

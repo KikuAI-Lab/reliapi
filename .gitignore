@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Secrets
+*.key
+*.pem
+secrets/
+
+# Docker
+.dockerignore
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Legacy/temporary directories
+api-template-ref/
+kiku-server-deploy/
+kikuai-api-template-private/
+llm-router/
+public-repo/
+reliapi-private/
+reliapi-private-temp/
+reliapi-wiki/
+reliapi_repo/
+v0-reliapi/
+wiki-temp/
