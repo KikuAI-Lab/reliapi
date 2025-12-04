@@ -8,6 +8,7 @@ Reliability layer for API calls: retries, caching, dedup, circuit breakers.
 
 ## Installation
 
+- **Product Hunt**: [⭐ Support us on Product Hunt](https://www.producthunt.com/products/reliapi) - Help us reach more developers!
 - **RapidAPI**: [Try ReliAPI on RapidAPI](https://rapidapi.com/kikuai-lab-kikuai-lab-default/api/reliapi) - No installation required, use directly from RapidAPI
 - **NPM Package**: [reliapi-sdk](https://www.npmjs.com/package/reliapi-sdk) - `npm install reliapi-sdk`
 - **PyPI Package**: [reliapi-sdk](https://pypi.org/project/reliapi-sdk/) - `pip install reliapi-sdk`
