@@ -1322,7 +1322,27 @@ async def rapidapi_status(request: Request):
     )
 
 
+# =============================================================================
+# Business Routes (Paddle, Onboarding, Analytics, Calculators, Dashboard)
+# =============================================================================
+
+# Import and register business routes
+try:
+    from reliapi.app.routes import paddle, onboarding, analytics, calculators, dashboard
+    
+    app.include_router(paddle.router)
+    app.include_router(onboarding.router)
+    app.include_router(analytics.router)
+    app.include_router(calculators.router)
+    app.include_router(dashboard.router)
+    
+    logger.info("Business routes registered: paddle, onboarding, analytics, calculators, dashboard")
+except ImportError as e:
+    logger.warning(f"Business routes not available: {e}")
+
+
 if __name__ == "__main__":
     import uvicorn
     
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
