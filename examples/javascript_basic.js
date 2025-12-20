@@ -8,8 +8,8 @@
  * - Response parsing
  */
 
-const RELIAPI_URL = process.env.RELIAPI_URL || 'https://reliapi.p.rapidapi.com';
-const API_KEY = process.env.RAPIDAPI_KEY || 'your-rapidapi-key';
+const RELIAPI_URL = process.env.RELIAPI_URL || 'https://reliapi.kikuai.dev';
+const API_KEY = process.env.RAPIDAPI_KEY || process.env.RELIAPI_API_KEY || 'your-api-key';
 
 /**
  * HTTP proxy example

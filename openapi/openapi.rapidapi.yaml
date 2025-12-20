@@ -1,0 +1,716 @@
+openapi: 3.0.3
+info:
+  title: ReliAPI
+  description: 'Reliability layer for API calls: retries, caching, dedup, circuit breakers.'
+  version: 1.0.1
+  contact:
+    name: KikuAI-Lab
+    url: https://github.com/kikuai-lab/reliapi
+    email: dev@kikuai.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://reliapi.kikuai.dev
+    description: Production server
+paths:
+  /healthz:
+    get:
+      summary: Health Check
+      description: Health check endpoint for monitoring and load balancers. Returns 200 when the service is healthy and ready to accept requests.
+      operationId: HealthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+              example:
+                status: healthy
+  /readyz:
+    get:
+      summary: Readiness Check
+      description: Readiness check endpoint for Kubernetes and orchestration systems. Returns 200 when the service is ready to handle requests.
+      operationId: ReadinessCheck
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ready
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: not_ready
+                  reason:
+                    type: string
+                    example: Service is initializing
+  /livez:
+    get:
+      summary: Liveness Check
+      description: Liveness check endpoint for Kubernetes and orchestration systems. Returns 200 when the service process is alive (may not be ready).
+      operationId: LivenessCheck
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: alive
+        '503':
+          description: Service is not alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: not_alive
+                  reason:
+                    type: string
+                    example: Process is not responding
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Prometheus metrics endpoint for monitoring API usage, errors, cache hits, and costs. Returns Prometheus-formatted metrics for integration with monitoring systems.
+      operationId: GetMetrics
+      responses:
+        '200':
+          description: Prometheus-formatted metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP reliapi_requests_total Total number of requests
+                  # TYPE reliapi_requests_total counter
+                  reliapi_requests_total{target="openai",kind="llm",outcome="success"} 1234
+  /proxy/http:
+    post:
+      summary: Proxy HTTP Request
+      description: |
+        Universal HTTP proxy endpoint for any HTTP API. Supports retries, circuit breaker, cache, and idempotency.
+        
+        Key Features:
+        - Automatic Retries - Failed requests are retried with exponential backoff
+        - Circuit Breaker - Stops making requests to failing services to prevent cascading failures
+        - Caching - GET requests are cached to reduce API calls and improve speed
+        - Idempotency - Duplicate requests with the same key execute only once
+        - Error Handling - Normalized error responses with retry guidance
+      operationId: ProxyHTTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HTTPProxyRequest'
+            example:
+              target: my_api
+              method: GET
+              path: /users/123
+              headers:
+                Custom-Header: value
+                Authorization: Bearer token123
+              query:
+                include: profile
+                page: 1
+                limit: 10
+              body: null
+              idempotency_key: req-123-unique
+              cache: 300
+      responses:
+        '200':
+          description: Successful HTTP proxy request
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Unique request identifier
+            X-Cache-Hit:
+              schema:
+                type: string
+              description: Whether response was from cache (true/false)
+            X-Retries:
+              schema:
+                type: integer
+              description: Number of retries performed
+            X-Duration-MS:
+              schema:
+                type: integer
+              description: Request duration in milliseconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPProxySuccessResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Upstream API error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /proxy/llm:
+    post:
+      summary: Proxy LLM Request
+      description: |
+        LLM proxy endpoint with idempotency, budget caps, and caching. Make idempotent LLM API calls with predictable costs.
+        
+        Supports OpenAI, Anthropic, and Mistral providers. Set stream=true for Server-Sent Events (SSE) streaming.
+        
+        Key Features:
+        - Prevents duplicate charges with idempotency keys
+        - Saves money with automatic caching
+        - Controls spending with budget caps
+        - Handles failures with automatic retries
+        - Tracks costs in USD
+      operationId: ProxyLLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMProxyRequest'
+            example:
+              target: openai
+              messages:
+                - role: user
+                  content: What is the capital of France?
+              model: gpt-4o-mini
+              max_tokens: 100
+              temperature: 0.7
+              stream: false
+              idempotency_key: unique-request-id-123
+              cache: 3600
+      responses:
+        '200':
+          description: Successful LLM proxy request
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Unique request identifier
+            X-Cache-Hit:
+              schema:
+                type: string
+              description: Whether response was from cache (true/false)
+            X-Retries:
+              schema:
+                type: integer
+              description: Number of retries performed
+            X-Duration-MS:
+              schema:
+                type: integer
+              description: Request duration in milliseconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProxySuccessResponse'
+        '400':
+          description: Budget cap exceeded or client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Account or IP banned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /rapidapi/status:
+    get:
+      summary: RapidAPI Integration Status
+      description: Check the status of RapidAPI integration, including subscription tier detection, rate limiting, and integration health.
+      operationId: GetRapidAPIStatus
+      responses:
+        '200':
+          description: RapidAPI integration status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RapidAPIStatusResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Invalid X-RapidAPI-Key header
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+      required:
+        - status
+    HTTPProxyRequest:
+      type: object
+      required:
+        - target
+        - method
+        - path
+      properties:
+        target:
+          type: string
+          description: Target name from config.yaml (e.g., 'my_api')
+          example: my_api
+        method:
+          type: string
+          description: 'HTTP method: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS'
+          enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - HEAD
+            - OPTIONS
+          example: GET
+        path:
+          type: string
+          description: API path (e.g., '/users/123' or '/api/v1/data')
+          example: /users/123
+        headers:
+          type: object
+          description: HTTP headers to include in request
+          additionalProperties:
+            type: string
+          example:
+            Custom-Header: value
+            Authorization: Bearer token123
+        query:
+          type: object
+          description: 'Query parameters (e.g., {''page'': 1, ''limit'': 10})'
+          additionalProperties: true
+          example:
+            include: profile
+            page: 1
+            limit: 10
+        body:
+          type: string
+          description: Request body as JSON string (for POST/PUT/PATCH)
+          nullable: true
+          example: null
+        idempotency_key:
+          type: string
+          description: Idempotency key for request coalescing. Concurrent requests with same key execute once.
+          nullable: true
+          example: req-123-unique
+        cache:
+          type: integer
+          description: Cache TTL in seconds (overrides config default). Only applies to GET/HEAD requests.
+          nullable: true
+          example: 300
+      description: |
+        Request schema for POST /proxy/http.
+        
+        Use this endpoint to proxy any HTTP API request with reliability layers:
+        - Retries with exponential backoff
+        - Circuit breaker per target
+        - TTL cache for GET/HEAD requests
+        - Idempotency with request coalescing
+    HTTPProxySuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - status_code
+          properties:
+            status_code:
+              type: integer
+              example: 200
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                Content-Type: application/json
+                X-RateLimit-Remaining: "99"
+            body:
+              description: Response body (parsed JSON if Content-Type is application/json)
+              oneOf:
+                - type: object
+                - type: string
+          example:
+            id: 123
+            name: John Doe
+            email: john@example.com
+        meta:
+          $ref: '#/components/schemas/RequestMeta'
+    LLMProxyRequest:
+      type: object
+      required:
+        - target
+        - messages
+      properties:
+        target:
+          type: string
+          description: LLM target name from config.yaml (e.g., 'openai', 'anthropic', 'mistral')
+          enum:
+            - openai
+            - anthropic
+            - mistral
+          example: openai
+        messages:
+          type: array
+          description: 'Messages list with ''role'' and ''content'' (e.g., [{''role'': ''user'', ''content'': ''Hello''}])'
+          items:
+            type: object
+            required:
+              - role
+              - content
+            properties:
+              role:
+                type: string
+                enum:
+                  - user
+                  - assistant
+                  - system
+                example: user
+              content:
+                type: string
+                example: What is the capital of France?
+          example:
+            - role: user
+              content: What is the capital of France?
+        model:
+          type: string
+          description: Model name (e.g., 'gpt-4o-mini', 'claude-3-haiku'). Uses default from config if not specified.
+          nullable: true
+          example: gpt-4o-mini
+        max_tokens:
+          type: integer
+          description: Maximum tokens in response (limited by config max_tokens and budget caps)
+          nullable: true
+          example: 100
+        temperature:
+          type: number
+          description: Temperature for sampling (0.0-2.0, limited by config)
+          minimum: 0
+          maximum: 2
+          nullable: true
+          example: 0.7
+        top_p:
+          type: number
+          description: Top-p sampling parameter (0.0-1.0)
+          minimum: 0
+          maximum: 1
+          nullable: true
+          example: 1.0
+        stop:
+          type: array
+          description: Stop sequences (e.g., ['\n', 'END'])
+          items:
+            type: string
+          nullable: true
+          example:
+            - "\n"
+            - END
+        stream:
+          type: boolean
+          description: Streaming mode. If true, returns Server-Sent Events (SSE) stream. If false or omitted, returns standard JSON response.
+          default: false
+          example: false
+        idempotency_key:
+          type: string
+          description: Idempotency key for request coalescing. Use same key for duplicate requests to avoid duplicate LLM calls.
+          nullable: true
+          example: unique-request-id-123
+        cache:
+          type: integer
+          description: Cache TTL in seconds (overrides config default). Cached responses return instantly without LLM call.
+          nullable: true
+          example: 3600
+      description: |
+        Request schema for POST /proxy/llm.
+        
+        Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic, and Mistral.
+        
+        Features:
+        - Idempotency: duplicate requests return cached result
+        - Budget caps: hard cap (reject) and soft cap (throttle)
+        - Caching: TTL cache for LLM responses
+        - Retries: automatic retries on failures
+    LLMProxySuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - content
+            - role
+          properties:
+            content:
+              type: string
+              description: The AI's response text
+              example: The capital of France is Paris.
+            role:
+              type: string
+              example: assistant
+            finish_reason:
+              type: string
+              example: stop
+            usage:
+              type: object
+              properties:
+                prompt_tokens:
+                  type: integer
+                  example: 12
+                completion_tokens:
+                  type: integer
+                  example: 8
+                total_tokens:
+                  type: integer
+                  example: 20
+        meta:
+          allOf:
+            - $ref: '#/components/schemas/RequestMeta'
+            - type: object
+              properties:
+                provider:
+                  type: string
+                  example: openai
+                model:
+                  type: string
+                  example: gpt-4o-mini
+                cost_usd:
+                  type: number
+                  format: float
+                  description: Actual cost of this request in USD
+                  example: 0.000012
+                cost_estimate_usd:
+                  type: number
+                  format: float
+                  description: Estimated cost before request
+                  example: 0.000015
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        meta:
+          $ref: '#/components/schemas/RequestMeta'
+    ErrorDetail:
+      type: object
+      required:
+        - type
+        - code
+        - message
+        - retryable
+        - status_code
+      properties:
+        type:
+          type: string
+          description: Error type
+          enum:
+            - client_error
+            - upstream_error
+            - rate_limit_error
+            - budget_error
+            - circuit_breaker_error
+            - timeout_error
+            - internal_error
+          example: client_error
+        code:
+          type: string
+          description: Error code
+          example: INVALID_REQUEST
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Missing required parameter: target"
+        retryable:
+          type: boolean
+          description: Whether the request can be retried
+          example: false
+        target:
+          type: string
+          description: Target API name (if applicable)
+          nullable: true
+          example: my_api
+        status_code:
+          type: integer
+          description: HTTP status code
+          example: 400
+    RequestMeta:
+      type: object
+      required:
+        - retries
+        - duration_ms
+        - request_id
+      properties:
+        target:
+          type: string
+          description: Target API name
+          nullable: true
+          example: my_api
+        cache_hit:
+          type: boolean
+          description: Whether response came from cache
+          example: false
+        idempotent_hit:
+          type: boolean
+          description: Whether this was a duplicate request
+          example: false
+        retries:
+          type: integer
+          description: Number of retry attempts made
+          example: 0
+        duration_ms:
+          type: integer
+          description: Request duration in milliseconds
+          example: 145
+        request_id:
+          type: string
+          description: Unique identifier for tracking
+          example: req_1234567890_abc12345
+    RapidAPIStatusResponse:
+      type: object
+      required:
+        - status
+        - tier
+      properties:
+        status:
+          type: string
+          description: Integration status
+          example: configured
+        tier:
+          type: string
+          description: Subscription tier
+          enum:
+            - free
+            - developer
+            - pro
+            - enterprise
+          example: free
+        usage:
+          type: object
+          properties:
+            requests_count:
+              type: integer
+              example: 0
+            requests_limit:
+              type: integer
+              example: 1000
+            period:
+              type: string
+              example: month
+            usage_percent:
+              type: number
+              format: float
+              example: 0.0
+        redis_connected:
+          type: boolean
+          example: true
+        api_configured:
+          type: boolean
+          example: false
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: integer
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+

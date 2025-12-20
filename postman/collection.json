@@ -10,7 +10,7 @@
           "request": {
             "name": "Healthz",
             "description": {
-              "content": "Health check endpoint with optional rate limiting.",
+              "content": "Health check endpoint with optional rate limiting. Returns 200 OK if the service is healthy.",
               "type": "text/plain"
             },
             "url": {
@@ -33,6 +33,23 @@
             "body": {},
             "auth": null
           },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 1000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "response": [
             {
               "id": "bc61bd5b-c4cc-4cb0-b0fa-2e4c97d9c7bb",
@@ -87,7 +104,7 @@
           "request": {
             "name": "Readyz",
             "description": {
-              "content": "Readiness check endpoint with optional rate limiting.",
+              "content": "Readiness check endpoint with optional rate limiting. Returns 200 OK if the service is ready to accept traffic.",
               "type": "text/plain"
             },
             "url": {
@@ -110,6 +127,23 @@
             "body": {},
             "auth": null
           },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 1000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "response": [
             {
               "id": "8cce8bd0-d3f1-4cb0-b809-64227169407a",
@@ -164,7 +198,7 @@
           "request": {
             "name": "Livez",
             "description": {
-              "content": "Liveness check endpoint with optional rate limiting.",
+              "content": "Liveness check endpoint with optional rate limiting. Returns 200 OK if the service is alive.",
               "type": "text/plain"
             },
             "url": {
@@ -187,6 +221,23 @@
             "body": {},
             "auth": null
           },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 1000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "response": [
             {
               "id": "cd5b1172-fbfc-46d7-8126-9100a3f0d442",
@@ -241,7 +292,7 @@
           "request": {
             "name": "Metrics",
             "description": {
-              "content": "Prometheus metrics endpoint with rate limiting.",
+              "content": "Prometheus metrics endpoint with rate limiting. Returns Prometheus-formatted metrics for monitoring.",
               "type": "text/plain"
             },
             "url": {
@@ -257,13 +308,30 @@
             "header": [
               {
                 "key": "Accept",
-                "value": "application/json"
+                "value": "text/plain"
               }
             ],
             "method": "GET",
             "body": {},
             "auth": null
           },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains Prometheus metrics', function () {",
+                  "    pm.expect(pm.response.text()).to.include('reliapi_');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "response": [
             {
               "id": "beccbf2a-f9b0-49c2-a3af-6ec7f8ac321f",
@@ -322,7 +390,7 @@
               "request": {
                 "name": "Proxy HTTP request",
                 "description": {
-                  "content": "Universal HTTP proxy endpoint for any HTTP API. Supports retries, circuit breaker, cache, and idempotency. Use this endpoint to add reliability layers to any HTTP API call.",
+                  "content": "Universal HTTP proxy endpoint for any HTTP API. Supports retries, circuit breaker, cache, and idempotency. Use this endpoint to add reliability layers to any HTTP API call.\n\nExample: Proxying a GET request to JSONPlaceholder API with caching.",
                   "type": "text/plain"
                 },
                 "url": {
@@ -344,12 +412,24 @@
                   {
                     "key": "Accept",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "X-RapidAPI-Key",
+                    "value": "{{rapidApiKey}}",
+                    "type": "text",
+                    "disabled": true
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{apiKey}}",
+                    "type": "text",
+                    "disabled": true
                   }
                 ],
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"target\": \"<string>\",\n  \"method\": \"<string>\",\n  \"path\": \"<string>\",\n  \"headers\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\",\n    \"key_2\": \"<string>\"\n  },\n  \"query\": {\n    \"key_0\": 3395.3480878444666\n  },\n  \"body\": \"<string>\",\n  \"idempotency_key\": \"<string>\",\n  \"cache\": \"<integer>\"\n}",
+                  "raw": "{\n  \"target\": \"jsonplaceholder\",\n  \"method\": \"GET\",\n  \"path\": \"/posts/1\",\n  \"headers\": {},\n  \"query\": {},\n  \"idempotency_key\": \"http-{{$randomUUID}}\",\n  \"cache\": 300\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -359,6 +439,52 @@
                 },
                 "auth": null
               },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Auto-set authorization header based on environment",
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "} else if (pm.environment.get('apiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'Authorization',",
+                      "        value: 'Bearer ' + pm.environment.get('apiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has JSON body', function () {",
+                      "    pm.response.to.be.json;",
+                      "});",
+                      "",
+                      "pm.test('Response contains cache information', function () {",
+                      "    const headers = pm.response.headers.toObject();",
+                      "    pm.expect(headers).to.have.property('x-cache-hit');",
+                      "});",
+                      "",
+                      "pm.test('Response time is reasonable', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "response": [
                 {
                   "id": "ad74a130-0791-4fb2-9208-9773d6412864",
@@ -472,11 +598,11 @@
           "item": [
             {
               "id": "02949b1f-55a3-412d-94dd-ea0523963934",
-              "name": "Proxy LLM request",
+              "name": "Proxy LLM request - OpenAI",
               "request": {
-                "name": "Proxy LLM request",
+                "name": "Proxy LLM request - OpenAI",
                 "description": {
-                  "content": "LLM proxy endpoint with idempotency, budget caps, and caching. Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic, and Mistral providers. Set stream=true for Server-Sent Events (SSE) streaming.",
+                  "content": "LLM proxy endpoint with idempotency, budget caps, and caching. Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic, and Mistral providers. Set stream=true for Server-Sent Events (SSE) streaming.\n\nThis example uses OpenAI GPT-4o-mini.",
                   "type": "text/plain"
                 },
                 "url": {
@@ -498,12 +624,24 @@
                   {
                     "key": "Accept",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "X-RapidAPI-Key",
+                    "value": "{{rapidApiKey}}",
+                    "type": "text",
+                    "disabled": true
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{apiKey}}",
+                    "type": "text",
+                    "disabled": true
                   }
                 ],
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"target\": \"<string>\",\n  \"messages\": [\n    {\n      \"key_0\": \"<string>\"\n    },\n    {\n      \"key_0\": \"<string>\"\n    }\n  ],\n  \"model\": \"<string>\",\n  \"max_tokens\": \"<integer>\",\n  \"temperature\": \"<number>\",\n  \"top_p\": \"<number>\",\n  \"stop\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"stream\": \"<boolean>\",\n  \"idempotency_key\": \"<string>\",\n  \"cache\": \"<integer>\"\n}",
+                  "raw": "{\n  \"target\": \"openai\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello! What is ReliAPI?\"\n    }\n  ],\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 100,\n  \"temperature\": 0.7,\n  \"idempotency_key\": \"test-key-{{$randomUUID}}\",\n  \"cache\": 3600\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -513,6 +651,57 @@
                 },
                 "auth": null
               },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Auto-set authorization header based on environment",
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "} else if (pm.environment.get('apiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'Authorization',",
+                      "        value: 'Bearer ' + pm.environment.get('apiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has JSON body', function () {",
+                      "    pm.response.to.be.json;",
+                      "});",
+                      "",
+                      "pm.test('Response contains choices', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('choices');",
+                      "});",
+                      "",
+                      "pm.test('Response contains cost information', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('cost_usd');",
+                      "});",
+                      "",
+                      "pm.test('Response time is less than 5000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "response": [
                 {
                   "id": "2395f854-518a-4b9c-9e57-2ec93e84e21f",
@@ -617,6 +806,225 @@
               "protocolProfileBehavior": {
                 "disableBodyPruning": true
               }
+            },
+            {
+              "id": "anthropic-llm-example",
+              "name": "Proxy LLM request - Anthropic Claude",
+              "request": {
+                "name": "Proxy LLM request - Anthropic Claude",
+                "description": {
+                  "content": "Example LLM request using Anthropic Claude 3 Sonnet via ReliAPI. Includes idempotency and caching.",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "proxy",
+                    "llm"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"target\": \"anthropic\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain what idempotency means in API design.\"\n    }\n  ],\n  \"model\": \"claude-3-sonnet-20240229\",\n  \"max_tokens\": 200,\n  \"temperature\": 0.7,\n  \"idempotency_key\": \"anthropic-{{$randomUUID}}\",\n  \"cache\": 3600\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "} else if (pm.environment.get('apiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'Authorization',",
+                      "        value: 'Bearer ' + pm.environment.get('apiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Response contains cost_usd', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('cost_usd');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "mistral-llm-example",
+              "name": "Proxy LLM request - Mistral",
+              "request": {
+                "name": "Proxy LLM request - Mistral",
+                "description": {
+                  "content": "Example LLM request using Mistral Large via ReliAPI. Includes idempotency and caching.",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "proxy",
+                    "llm"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"target\": \"mistral\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is circuit breaker pattern?\"\n    }\n  ],\n  \"model\": \"mistral-large-latest\",\n  \"max_tokens\": 150,\n  \"temperature\": 0.7,\n  \"idempotency_key\": \"mistral-{{$randomUUID}}\",\n  \"cache\": 3600\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "} else if (pm.environment.get('apiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'Authorization',",
+                      "        value: 'Bearer ' + pm.environment.get('apiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Response contains cost_usd', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('cost_usd');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "llm-streaming-example",
+              "name": "Proxy LLM request - Streaming (SSE)",
+              "request": {
+                "name": "Proxy LLM request - Streaming (SSE)",
+                "description": {
+                  "content": "Example of streaming LLM response using Server-Sent Events (SSE). Set stream=true and Accept header to text/event-stream.",
+                  "type": "text/plain"
+                },
+                "url": {
+                  "path": [
+                    "proxy",
+                    "llm"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "text/event-stream"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"target\": \"openai\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a short poem about reliability.\"\n    }\n  ],\n  \"model\": \"gpt-4o-mini\",\n  \"stream\": true,\n  \"max_tokens\": 100,\n  \"idempotency_key\": \"stream-{{$randomUUID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "} else if (pm.environment.get('apiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'Authorization',",
+                      "        value: 'Bearer ' + pm.environment.get('apiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Content-Type is text/event-stream', function () {",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/event-stream');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -636,7 +1044,7 @@
               "request": {
                 "name": "RapidAPI Integration Status",
                 "description": {
-                  "content": "Check the status of RapidAPI integration.",
+                  "content": "Check the status of RapidAPI integration, including subscription tier detection, rate limiting, and integration health.",
                   "type": "text/plain"
                 },
                 "url": {
@@ -654,12 +1062,49 @@
                   {
                     "key": "Accept",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "X-RapidAPI-Key",
+                    "value": "{{rapidApiKey}}",
+                    "type": "text"
                   }
                 ],
                 "method": "GET",
                 "body": {},
                 "auth": null
               },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.environment.get('rapidApiKey')) {",
+                      "    pm.request.headers.add({",
+                      "        key: 'X-RapidAPI-Key',",
+                      "        value: pm.environment.get('rapidApiKey')",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response contains tier information', function () {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('tier');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "response": [
                 {
                   "id": "a9acde9d-5289-4b20-8933-20777912599a",

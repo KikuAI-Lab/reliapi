@@ -1,0 +1,2 @@
+"""ReliAPI FastAPI application."""
+

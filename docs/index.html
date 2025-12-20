@@ -5,6 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReliAPI - Stability Engine for HTTP and LLM APIs</title>
   <meta name="description" content="Transform chaos into stability. ReliAPI provides automatic failover, rate limit handling, request deduplication, and budget protection for your API calls.">
+  <meta name="keywords" content="OpenAI API, Anthropic API, Mistral API, LLM API, retry logic, API caching, idempotency, circuit breaker, API proxy, reduce API costs, prevent duplicate charges, OpenAI retry, API reliability, HTTP API proxy, LLM proxy, budget caps, cost tracking">
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ReliAPI",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Production-ready reliability layer for HTTP and LLM APIs with automatic retries, caching, idempotency, and budget controls. Prevents duplicate charges, reduces API costs by 50-80%, and provides circuit breaker functionality.",
+    "keywords": "OpenAI API, Anthropic API, Mistral API, retry logic, API caching, idempotency, circuit breaker, API proxy, reduce API costs, prevent duplicate charges",
+    "author": {
+      "@type": "Organization",
+      "name": "KikuAI Lab",
+      "url": "https://github.com/KikuAI-Lab"
+    },
+    "codeRepository": "https://github.com/KikuAI-Lab/reliapi",
+    "programmingLanguage": "Python",
+    "runtimePlatform": "Python 3.12+",
+    "url": "https://rapidapi.com/kikuai-lab-kikuai-lab-default/api/reliapi",
+    "screenshot": "./images/reliapi-logo.png"
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "KikuAI Lab",
+    "url": "https://github.com/KikuAI-Lab",
+    "logo": "./images/reliapi-logo.png",
+    "sameAs": [
+      "https://github.com/KikuAI-Lab/reliapi"
+    ]
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://github.com/KikuAI-Lab/reliapi"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Documentation",
+        "item": "./index.html"
+      }
+    ]
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does ReliAPI prevent duplicate charges?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ReliAPI uses idempotency keys to ensure the same request is only charged once, even if users click twice or retries happen. Same request with same key = only one charge."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much can I save on LLM API costs with ReliAPI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ReliAPI can reduce LLM API costs by 50-80% through intelligent caching. Repeated questions don't trigger new API calls - same question = instant response, no API call, no charge."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does ReliAPI support OpenAI, Anthropic, and Mistral APIs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, ReliAPI works seamlessly with OpenAI (GPT-4, GPT-4 Turbo, GPT-3.5), Anthropic (Claude 3 Opus, Sonnet, Haiku), and Mistral (Large, Medium, Small) APIs. No configuration needed for LLM providers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a circuit breaker and how does ReliAPI use it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A circuit breaker automatically stops calling failing services to prevent cascading failures. ReliAPI's circuit breaker detects failures and auto-recovers when services come back online, protecting your application from API outages."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does ReliAPI handle retry logic?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ReliAPI implements automatic retries with exponential backoff and jitter. It respects Retry-After headers from upstream APIs and handles temporary failures gracefully, eliminating the need for manual retry logic."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I set budget limits with ReliAPI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, ReliAPI supports both hard and soft cost caps for LLM APIs. Hard caps automatically reject expensive requests before they execute, while soft caps reduce max_tokens to stay within budget. Perfect for preventing surprise bills."
+        }
+      }
+    ]
+  }
+  </script>
+  
   <link rel="icon" href="./images/reliapi-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -1,0 +1,931 @@
+openapi: 3.1.0
+info:
+  title: ReliAPI
+  description: 'Reliability layer for API calls: retries, caching, dedup, circuit breakers.'
+  version: 1.0.1
+  contact:
+    name: KikuAI-Lab
+    url: https://github.com/kikuai-lab/reliapi
+    email: dev@kikuai.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://reliapi.kikuai.dev
+    description: Production server
+paths:
+  /healthz:
+    get:
+      summary: Health Check
+      description: Health check endpoint for monitoring and load balancers. Returns 200 when the service is healthy and ready to accept requests.
+      operationId: healthz_healthz_get
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+  /readyz:
+    get:
+      summary: Readiness Check
+      description: Readiness check endpoint for Kubernetes and orchestration systems. Returns 200 when the service is ready to handle requests.
+      operationId: readyz_readyz_get
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+              example:
+                status: ready
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotReadyResponse'
+              example:
+                status: not_ready
+                reason: Service is initializing
+  /livez:
+    get:
+      summary: Liveness Check
+      description: Liveness check endpoint for Kubernetes and orchestration systems. Returns 200 when the service process is alive (may not be ready).
+      operationId: livez_livez_get
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivenessResponse'
+              example:
+                status: alive
+        '503':
+          description: Service is not alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAliveResponse'
+              example:
+                status: not_alive
+                reason: Process is not responding
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Prometheus metrics endpoint for monitoring API usage, errors, cache hits, and costs. Returns Prometheus-formatted metrics for integration with monitoring systems.
+      operationId: metrics_metrics_get
+      tags:
+        - Metrics
+      responses:
+        '200':
+          description: Prometheus-formatted metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP reliapi_requests_total Total number of requests
+                  # TYPE reliapi_requests_total counter
+                  reliapi_requests_total{target="openai",kind="llm",outcome="success"} 1234
+  /proxy/http:
+    post:
+      summary: Proxy HTTP Request
+      description: |
+        Universal HTTP proxy endpoint for any HTTP API. Supports retries, circuit breaker, cache, and idempotency.
+        
+        Key Features:
+        - Automatic Retries - Failed requests are retried with exponential backoff
+        - Circuit Breaker - Stops making requests to failing services to prevent cascading failures
+        - Caching - GET requests are cached to reduce API calls and improve speed
+        - Idempotency - Duplicate requests with the same key execute only once
+        - Error Handling - Normalized error responses with retry guidance
+      operationId: proxy_http_proxy_http_post
+      tags:
+        - Proxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HTTPProxyRequest'
+            example:
+              target: my_api
+              method: GET
+              path: /users/123
+              headers:
+                Custom-Header: value
+                Authorization: Bearer token123
+              query:
+                include: profile
+                page: 1
+                limit: 10
+              body: null
+              idempotency_key: req-123-unique
+              cache: 300
+      responses:
+        '200':
+          description: Successful HTTP proxy request
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Unique request identifier
+            X-Cache-Hit:
+              schema:
+                type: string
+              description: Whether response was from cache (true/false)
+            X-Retries:
+              schema:
+                type: integer
+              description: Number of retries performed
+            X-Duration-MS:
+              schema:
+                type: integer
+              description: Request duration in milliseconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPProxySuccessResponse'
+              example:
+                success: true
+                data:
+                  status_code: 200
+                  headers:
+                    Content-Type: application/json
+                    X-RateLimit-Remaining: "99"
+                  body:
+                    id: 123
+                    name: John Doe
+                    email: john@example.com
+                meta:
+                  target: my_api
+                  cache_hit: false
+                  idempotent_hit: false
+                  retries: 0
+                  duration_ms: 145
+                  request_id: req_1234567890_abc12345
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: client_error
+                  code: INVALID_REQUEST
+                  message: "Missing required parameter: target"
+                  retryable: false
+                  target: null
+                  status_code: 400
+                meta:
+                  target: null
+                  retries: 0
+                  duration_ms: 5
+                  request_id: req_1234567890_abc12345
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: internal_error
+                  code: INTERNAL_ERROR
+                  message: Internal server error
+                  retryable: true
+                  target: null
+                  status_code: 500
+                meta:
+                  target: null
+                  retries: 0
+                  duration_ms: 5
+                  request_id: req_1234567890_abc12345
+        '503':
+          description: Upstream API error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: upstream_error
+                  code: UPSTREAM_ERROR
+                  message: "Upstream API returned 503 Service Unavailable"
+                  retryable: true
+                  target: my_api
+                  status_code: 503
+                meta:
+                  target: my_api
+                  retries: 2
+                  duration_ms: 1250
+                  request_id: req_1234567890_abc12345
+  /proxy/llm:
+    post:
+      summary: Proxy LLM Request
+      description: |
+        LLM proxy endpoint with idempotency, budget caps, and caching. Make idempotent LLM API calls with predictable costs.
+        
+        Supports OpenAI, Anthropic, and Mistral providers. Set stream=true for Server-Sent Events (SSE) streaming.
+        
+        Key Features:
+        - Prevents duplicate charges with idempotency keys
+        - Saves money with automatic caching
+        - Controls spending with budget caps
+        - Handles failures with automatic retries
+        - Tracks costs in USD
+      operationId: proxy_llm_proxy_llm_post
+      tags:
+        - Proxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMProxyRequest'
+            example:
+              target: openai
+              messages:
+                - role: user
+                  content: What is the capital of France?
+              model: gpt-4o-mini
+              max_tokens: 100
+              temperature: 0.7
+              stream: false
+              idempotency_key: unique-request-id-123
+              cache: 3600
+      responses:
+        '200':
+          description: Successful LLM proxy request
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Unique request identifier
+            X-Cache-Hit:
+              schema:
+                type: string
+              description: Whether response was from cache (true/false)
+            X-Retries:
+              schema:
+                type: integer
+              description: Number of retries performed
+            X-Duration-MS:
+              schema:
+                type: integer
+              description: Request duration in milliseconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProxySuccessResponse'
+              example:
+                success: true
+                data:
+                  content: The capital of France is Paris.
+                  role: assistant
+                  finish_reason: stop
+                  usage:
+                    prompt_tokens: 12
+                    completion_tokens: 8
+                    total_tokens: 20
+                meta:
+                  target: openai
+                  provider: openai
+                  model: gpt-4o-mini
+                  cache_hit: false
+                  idempotent_hit: false
+                  retries: 0
+                  duration_ms: 1250
+                  request_id: req_1234567890_abc12345
+                  cost_usd: 0.000012
+                  cost_estimate_usd: 0.000015
+        '400':
+          description: Budget cap exceeded or client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: budget_error
+                  code: BUDGET_EXCEEDED
+                  message: "Estimated cost $0.05 exceeds hard cap $0.01"
+                  retryable: false
+                  target: openai
+                  status_code: 400
+                meta:
+                  target: openai
+                  retries: 0
+                  duration_ms: 5
+                  request_id: req_1234567890_abc12345
+        '403':
+          description: Account or IP banned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: client_error
+                  code: FORBIDDEN
+                  message: "Account/IP banned: IP banned: 63 bypass attempts"
+                  retryable: false
+                  target: null
+                  status_code: 403
+                meta:
+                  target: null
+                  retries: 0
+                  duration_ms: 5
+                  request_id: req_1234567890_abc12345
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  type: internal_error
+                  code: INTERNAL_ERROR
+                  message: Internal server error
+                  retryable: true
+                  target: null
+                  status_code: 500
+                meta:
+                  target: null
+                  retries: 0
+                  duration_ms: 5
+                  request_id: req_1234567890_abc12345
+  /rapidapi/status:
+    get:
+      summary: RapidAPI Integration Status
+      description: Check the status of RapidAPI integration, including subscription tier detection, rate limiting, and integration health.
+      operationId: rapidapi_status_rapidapi_status_get
+      tags:
+        - Status
+      responses:
+        '200':
+          description: RapidAPI integration status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RapidAPIStatusResponse'
+              example:
+                status: configured
+                tier: free
+                usage:
+                  requests_count: 0
+                  requests_limit: 1000
+                  period: month
+                  usage_percent: 0.0
+                redis_connected: true
+                api_configured: false
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+                message: Invalid X-RapidAPI-Key header
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+      required:
+        - status
+      title: HealthResponse
+    ReadinessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ready
+      required:
+        - status
+      title: ReadinessResponse
+    NotReadyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: not_ready
+        reason:
+          type: string
+          example: Service is initializing
+      required:
+        - status
+      title: NotReadyResponse
+    LivenessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: alive
+      required:
+        - status
+      title: LivenessResponse
+    NotAliveResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: not_alive
+        reason:
+          type: string
+          example: Process is not responding
+      required:
+        - status
+      title: NotAliveResponse
+    HTTPProxyRequest:
+      type: object
+      required:
+        - target
+        - method
+        - path
+      properties:
+        target:
+          type: string
+          title: Target
+          description: Target name from config.yaml (e.g., 'my_api')
+          example: my_api
+        method:
+          type: string
+          title: Method
+          description: 'HTTP method: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS'
+          enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - HEAD
+            - OPTIONS
+          example: GET
+        path:
+          type: string
+          title: Path
+          description: API path (e.g., '/users/123' or '/api/v1/data')
+          example: /users/123
+        headers:
+          anyOf:
+            - type: object
+              additionalProperties:
+                type: string
+            - type: 'null'
+          title: Headers
+          description: HTTP headers to include in request
+          example:
+            Custom-Header: value
+            Authorization: Bearer token123
+        query:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Query
+          description: 'Query parameters (e.g., {''page'': 1, ''limit'': 10})'
+          example:
+            include: profile
+            page: 1
+            limit: 10
+        body:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Body
+          description: Request body as JSON string (for POST/PUT/PATCH)
+          example: null
+        idempotency_key:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for request coalescing. Concurrent requests with same key execute once.
+          example: req-123-unique
+        cache:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Cache
+          description: Cache TTL in seconds (overrides config default). Only applies to GET/HEAD requests.
+          example: 300
+      title: HTTPProxyRequest
+      description: |
+        Request schema for POST /proxy/http.
+        
+        Use this endpoint to proxy any HTTP API request with reliability layers:
+        - Retries with exponential backoff
+        - Circuit breaker per target
+        - TTL cache for GET/HEAD requests
+        - Idempotency with request coalescing
+    HTTPProxySuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - status_code
+          properties:
+            status_code:
+              type: integer
+              example: 200
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                Content-Type: application/json
+                X-RateLimit-Remaining: "99"
+            body:
+              description: Response body (parsed JSON if Content-Type is application/json)
+              oneOf:
+                - type: object
+                - type: string
+                - type: null
+              example:
+                id: 123
+                name: John Doe
+                email: john@example.com
+        meta:
+          $ref: '#/components/schemas/RequestMeta'
+      title: HTTPProxySuccessResponse
+    LLMProxyRequest:
+      type: object
+      required:
+        - target
+        - messages
+      properties:
+        target:
+          type: string
+          title: Target
+          description: LLM target name from config.yaml (e.g., 'openai', 'anthropic', 'mistral')
+          enum:
+            - openai
+            - anthropic
+            - mistral
+          example: openai
+        messages:
+          type: array
+          title: Messages
+          description: 'Messages list with ''role'' and ''content'' (e.g., [{''role'': ''user'', ''content'': ''Hello''}])'
+          items:
+            type: object
+            required:
+              - role
+              - content
+            properties:
+              role:
+                type: string
+                enum:
+                  - user
+                  - assistant
+                  - system
+                example: user
+              content:
+                type: string
+                example: What is the capital of France?
+          example:
+            - role: user
+              content: What is the capital of France?
+        model:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Model
+          description: Model name (e.g., 'gpt-4o-mini', 'claude-3-haiku'). Uses default from config if not specified.
+          example: gpt-4o-mini
+        max_tokens:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens in response (limited by config max_tokens and budget caps)
+          example: 100
+        temperature:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Temperature
+          description: Temperature for sampling (0.0-2.0, limited by config)
+          minimum: 0
+          maximum: 2
+          example: 0.7
+        top_p:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Top P
+          description: Top-p sampling parameter (0.0-1.0)
+          minimum: 0
+          maximum: 1
+          example: 1.0
+        stop:
+          anyOf:
+            - type: array
+              items:
+                type: string
+            - type: 'null'
+          title: Stop
+          description: Stop sequences (e.g., ['\n', 'END'])
+          example:
+            - "\n"
+            - END
+        stream:
+          type: boolean
+          title: Stream
+          description: Streaming mode. If true, returns Server-Sent Events (SSE) stream. If false or omitted, returns standard JSON response.
+          default: false
+          example: false
+        idempotency_key:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for request coalescing. Use same key for duplicate requests to avoid duplicate LLM calls.
+          example: unique-request-id-123
+        cache:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Cache
+          description: Cache TTL in seconds (overrides config default). Cached responses return instantly without LLM call.
+          example: 3600
+      title: LLMProxyRequest
+      description: |
+        Request schema for POST /proxy/llm.
+        
+        Make idempotent LLM API calls with predictable costs. Supports OpenAI, Anthropic, and Mistral.
+        
+        Features:
+        - Idempotency: duplicate requests return cached result
+        - Budget caps: hard cap (reject) and soft cap (throttle)
+        - Caching: TTL cache for LLM responses
+        - Retries: automatic retries on failures
+    LLMProxySuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - content
+            - role
+          properties:
+            content:
+              type: string
+              description: The AI's response text
+              example: The capital of France is Paris.
+            role:
+              type: string
+              example: assistant
+            finish_reason:
+              type: string
+              example: stop
+            usage:
+              type: object
+              properties:
+                prompt_tokens:
+                  type: integer
+                  example: 12
+                completion_tokens:
+                  type: integer
+                  example: 8
+                total_tokens:
+                  type: integer
+                  example: 20
+        meta:
+          allOf:
+            - $ref: '#/components/schemas/RequestMeta'
+            - type: object
+              properties:
+                provider:
+                  type: string
+                  example: openai
+                model:
+                  type: string
+                  example: gpt-4o-mini
+                cost_usd:
+                  type: number
+                  format: float
+                  description: Actual cost of this request in USD
+                  example: 0.000012
+                cost_estimate_usd:
+                  type: number
+                  format: float
+                  description: Estimated cost before request
+                  example: 0.000015
+      title: LLMProxySuccessResponse
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        meta:
+          $ref: '#/components/schemas/RequestMeta'
+      title: ErrorResponse
+    ErrorDetail:
+      type: object
+      required:
+        - type
+        - code
+        - message
+        - retryable
+        - status_code
+      properties:
+        type:
+          type: string
+          description: Error type
+          enum:
+            - client_error
+            - upstream_error
+            - rate_limit_error
+            - budget_error
+            - circuit_breaker_error
+            - timeout_error
+            - internal_error
+          example: client_error
+        code:
+          type: string
+          description: Error code
+          example: INVALID_REQUEST
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Missing required parameter: target"
+        retryable:
+          type: boolean
+          description: Whether the request can be retried
+          example: false
+        target:
+          anyOf:
+            - type: string
+            - type: 'null'
+          description: Target API name (if applicable)
+          example: my_api
+        status_code:
+          type: integer
+          description: HTTP status code
+          example: 400
+      title: ErrorDetail
+    RequestMeta:
+      type: object
+      required:
+        - retries
+        - duration_ms
+        - request_id
+      properties:
+        target:
+          anyOf:
+            - type: string
+            - type: 'null'
+          description: Target API name
+          example: my_api
+        cache_hit:
+          type: boolean
+          description: Whether response came from cache
+          example: false
+        idempotent_hit:
+          type: boolean
+          description: Whether this was a duplicate request
+          example: false
+        retries:
+          type: integer
+          description: Number of retry attempts made
+          example: 0
+        duration_ms:
+          type: integer
+          description: Request duration in milliseconds
+          example: 145
+        request_id:
+          type: string
+          description: Unique identifier for tracking
+          example: req_1234567890_abc12345
+      title: RequestMeta
+    RapidAPIStatusResponse:
+      type: object
+      required:
+        - status
+        - tier
+      properties:
+        status:
+          type: string
+          description: Integration status
+          example: configured
+        tier:
+          type: string
+          description: Subscription tier
+          enum:
+            - free
+            - developer
+            - pro
+            - enterprise
+          example: free
+        usage:
+          type: object
+          properties:
+            requests_count:
+              type: integer
+              example: 0
+            requests_limit:
+              type: integer
+              example: 1000
+            period:
+              type: string
+              example: month
+            usage_percent:
+              type: number
+              format: float
+              example: 0.0
+        redis_connected:
+          type: boolean
+          example: true
+        api_configured:
+          type: boolean
+          example: false
+      title: RapidAPIStatusResponse
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+      title: HTTPValidationError
+    ValidationError:
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      title: ValidationError
+
