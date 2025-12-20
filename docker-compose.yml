@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  reliapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reliapi
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - RELIAPI_CONFIG_PATH=/app/config.yaml
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      - PADDLE_API_KEY=${PADDLE_API_KEY:-}
+      - PADDLE_VENDOR_ID=${PADDLE_VENDOR_ID:-}
+      - PADDLE_WEBHOOK_SECRET=${PADDLE_WEBHOOK_SECRET:-}
+      - PADDLE_ENVIRONMENT=${PADDLE_ENVIRONMENT:-sandbox}
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/healthz', timeout=5)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - reliapi-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-reliapi
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reliapi-network
+
+volumes:
+  redis-data:
+
+
+networks:
+  reliapi-network:
+    driver: bridge
