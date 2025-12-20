@@ -177,7 +177,7 @@ async def paddle_webhook(
     event_data = event.get("data", {})
 
     # Import subscription service
-    from reliapi.app.services.subscription import SubscriptionService
+    from reliapi.app.business_services.subscription import SubscriptionService
 
     # Process different event types automatically
     if event_type == "subscription.created":

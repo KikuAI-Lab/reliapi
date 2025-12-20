@@ -1,0 +1,95 @@
+# ReliAPI Configuration Example
+# All targets (upstreams) are defined here
+
+targets:
+  # Example: OpenAI LLM provider
+  openai:
+    base_url: "https://api.openai.com/v1"
+    timeout_ms: 20000
+    circuit:
+      error_threshold: 5
+      cooldown_s: 60
+    llm:
+      provider: "openai"  # Explicit provider (optional, auto-detected from base_url if not specified)
+      default_model: "gpt-4o-mini"
+      max_tokens: 1024
+      temperature: 0.7
+      # Budget control: predictable costs
+      soft_cost_cap_usd: 0.01    # Warn and throttle if exceeded
+      hard_cost_cap_usd: 0.05    # Reject if exceeded
+    cache:
+      ttl_s: 60
+      enabled: true
+    auth:
+      type: bearer_env
+      env_var: OPENAI_API_KEY
+    # fallback_targets: ["anthropic", "mistral"]  # Planned: simple fallback chain for LLM proxy
+    retry_matrix:
+      "429":
+        attempts: 3
+        backoff: "exp-jitter"
+        base_s: 1.0
+        max_s: 60.0
+      "5xx":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0
+      "net":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0
+
+  # Example: Anthropic LLM provider
+  anthropic:
+    base_url: "https://api.anthropic.com/v1"
+    timeout_ms: 25000
+    circuit:
+      error_threshold: 5
+      cooldown_s: 60
+    llm:
+      provider: "anthropic"  # Explicit provider (optional, auto-detected from base_url if not specified)
+      default_model: "claude-3-haiku-20240307"
+      max_tokens: 2048
+      temperature: 0.2
+      # Budget control
+      soft_cost_cap_usd: 0.005
+      hard_cost_cap_usd: 0.02
+    cache:
+      ttl_s: 300
+      enabled: true
+    auth:
+      type: bearer_env
+      env_var: ANTHROPIC_API_KEY
+    retry_matrix:
+      "429":
+        attempts: 3
+        backoff: "exp-jitter"
+        base_s: 2.0
+      "5xx":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0
+
+  # Example: Generic HTTP API (not LLM)
+  payments_api:
+    base_url: "https://api.payments.example.com"
+    timeout_ms: 12000
+    circuit:
+      error_threshold: 3
+      cooldown_s: 30
+    cache:
+      ttl_s: 300
+      enabled: true
+    auth:
+      type: api_key
+      header: "X-API-Key"
+      env_var: PAYMENTS_API_KEY
+    retry_matrix:
+      "429":
+        attempts: 3
+        backoff: "exp-jitter"
+        base_s: 1.0
+      "5xx":
+        attempts: 2
+        backoff: "exp-jitter"
+        base_s: 1.0

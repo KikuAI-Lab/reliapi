@@ -14,8 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . /app/
 
-# Add current directory to Python path
+# Add current directory to Python path AND create symlink for module imports
 ENV PYTHONPATH=/app
+RUN ln -s /app /app/reliapi
 
 # Create non-root user
 RUN useradd -m -u 1000 reliapi && chown -R reliapi:reliapi /app
