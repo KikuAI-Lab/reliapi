@@ -57,15 +57,13 @@ class Cache:
                     significant_headers[h] = headers[h]
 
         # Sort query params for consistent keys
-        sorted_query = {}
-        if query:
-            sorted_query = dict(sorted(query.items()))
-
+        # json.dumps(sort_keys=True) handles sorting recursively, so we don't need manual sorting here.
+        # We also pass dicts directly to avoid double serialization which is slow.
         key_data = {
             "method": method.upper(),
             "url": url,
-            "query": json.dumps(sorted_query, sort_keys=True),
-            "headers": json.dumps(significant_headers, sort_keys=True),
+            "query": query or {},
+            "headers": significant_headers,
         }
         
         # For POST/PUT/PATCH with body, include body hash
