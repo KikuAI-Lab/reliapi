@@ -268,8 +268,14 @@ def _register_routes(app: FastAPI) -> None:
     from reliapi.app.routes import health, proxy, rapidapi
 
     app.include_router(health.router)
-    app.include_router(proxy.router)
-    app.include_router(rapidapi.router)
+    
+    # v1 API routes (canonical)
+    app.include_router(proxy.router, prefix="/v1")
+    app.include_router(rapidapi.router, prefix="/v1")
+    
+    # Legacy routes (deprecated - will be removed in 6 months)
+    app.include_router(proxy.router, deprecated=True, tags=["Legacy"])
+    app.include_router(rapidapi.router, deprecated=True, tags=["Legacy"])
 
     # Import and register business routes
     try:
@@ -293,6 +299,7 @@ def _register_routes(app: FastAPI) -> None:
         )
     except ImportError as e:
         logger.warning(f"Business routes not available: {e}")
+
 
 
 # Create the application instance
