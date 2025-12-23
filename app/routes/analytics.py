@@ -3,13 +3,18 @@
 This module provides analytics endpoints for tracking user behavior,
 conversion funnels, and events. All tracking is automated through APIs.
 """
-
+import base64
+import json
+import logging
 import os
-from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Request, Header, Body
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Optional
+
 import httpx
+from fastapi import APIRouter, Request
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -174,16 +179,12 @@ async def _track_google_analytics(event_data: Dict[str, Any], ga_id: str) -> Non
                 timeout=5.0,
             )
     except Exception as e:
-        # Log error but don't fail the request
-        print(f"Google Analytics tracking error: {e}")
+        logger.warning(f"Google Analytics tracking error: {e}")
 
 
 async def _track_mixpanel(event_data: Dict[str, Any], token: str) -> None:
     """Track event in Mixpanel."""
     try:
-        import base64
-        import json
-
         # Mixpanel uses base64 encoded JSON
         event_payload = {
             "event": event_data["event_name"],
@@ -203,8 +204,7 @@ async def _track_mixpanel(event_data: Dict[str, Any], token: str) -> None:
                 timeout=5.0,
             )
     except Exception as e:
-        # Log error but don't fail the request
-        print(f"Mixpanel tracking error: {e}")
+        logger.warning(f"Mixpanel tracking error: {e}")
 
 
 async def _track_posthog(event_data: Dict[str, Any], api_key: str, host: str) -> None:
@@ -222,6 +222,4 @@ async def _track_posthog(event_data: Dict[str, Any], api_key: str, host: str) ->
                 timeout=5.0,
             )
     except Exception as e:
-        # Log error but don't fail the request
-        print(f"PostHog tracking error: {e}")
-
+        logger.warning(f"PostHog tracking error: {e}")
