@@ -231,11 +231,11 @@ See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for production deployment guide.
 - [Postman Collection](./postman/collection.json)
 - [Live Docs](https://reliapi.kikuai.dev/docs)
 
-## License
-
-MIT License - see [LICENSE](./LICENSE) for details.
-
 ## Support
 
 - GitHub Issues: https://github.com/KikuAI-Lab/reliapi/issues
 - Email: dev@kikuai.dev
+
+## License
+
+AGPL-3.0. Copyright (c) 2025 KikuAI Lab
